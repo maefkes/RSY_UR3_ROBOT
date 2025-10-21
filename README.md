@@ -32,3 +32,4 @@ git branch      # zeigt alle lokalen Branches an und markiert den aktuellen
 git branch -a   # zeigt alle lokalen und Remote-Branches an
 git switch <branch-name>    # wechselt in anderen branch
 ```
+## Virtual Environment anlegen
