@@ -32,4 +32,12 @@ git branch      # zeigt alle lokalen Branches an und markiert den aktuellen
 git branch -a   # zeigt alle lokalen und Remote-Branches an
 git switch <branch-name>    # wechselt in anderen branch
 ```
+Denkt am besten dran eine .gitignore Datei in euren lokalen Ordner zu legen, um das remote-repo nicht unnötig voll zu packen. Es gibt dafür gute Vorlagen online.
 ## Virtual Environment anlegen
+Es ist sinnvoll mit **python virtual environments** zu arbeiten, da man so lokal Pakete installieren kann, ohne die Gefahr von Versionskonflikten mit anderen Python Projekten zu haben. Hier ein paar nützliche Befehle zur Erstellung:
+
+```pip -m venv .venv``` erstellt ein virtual environment mit dem Namen .venv im aktuellen Ordner.
+
+```.venv/Scripts/activate``` aktiviert das venv. Ab jetzt guckt der Python interpreter nur noch auf die in diesem venv installierten Pakete. Alles, was jetzt mit pip install installiert wird, landet lokal in dem venv.
+
+```deactivate``` deaktiviert das venv wieder.
