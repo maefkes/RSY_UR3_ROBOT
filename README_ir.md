@@ -10,6 +10,7 @@ Der Würfel muss so erkannt werden, dass der Roboter ihn greifen und lösen kann
 - Matrix für Lösungsalgorithmus erstellen
 ## ToDo
 - [x] Würfellokalisierung
-- [x] Würfelorientierung
-- [ ] Farberkennung
+- [x] Würfelorientierung zum Greifen
+- [x] Farberkennung
+- [ ] Würfelorientierung für die Farben
 - [ ] In Matrix umwandeln
