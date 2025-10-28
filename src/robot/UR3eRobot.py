@@ -29,5 +29,12 @@ class UR3eRobot:
         
     
         
+     def disconnect(self):
+        self.rtdeControl.disconnect()
+        self.rtdeReceive.disconnect()
+        
+    def reconnect(self):
+        self.rtdeControl.reconnect()
+        self.rtdeReceive.reconnect()
 
 

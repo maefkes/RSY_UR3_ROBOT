@@ -25,6 +25,7 @@ def testMain():
     robot3.moveL(posRobot3, speed, acc)
     
     posRobot4 = robot4.getActualTCPPose()
+    
     '''
     posRobot4[0] -= 0.001
     posRobot4[1] -= 0.001
