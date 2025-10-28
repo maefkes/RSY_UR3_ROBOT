@@ -17,6 +17,17 @@ class UR3eRobot:
     
     def moveL(self, position, speed, acc):
         self.rtdeControl.moveL(position, speed, acc)
+
+
+    def disconnect(self):
+        self.rtdeControl.disconnect()
+        self.rtdeReceive.disconnect()
+        
+    def reconnect(self):
+        self.rtdeControl.reconnect()
+        self.rtdeReceive.reconnect()
+        
+    
         
 
 
