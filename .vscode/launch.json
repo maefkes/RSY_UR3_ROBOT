@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Simulation",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "env": {
+        "SIMULATION": "True"
+      },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Real",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "env": {
+        "SIMULATION": "False"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}
