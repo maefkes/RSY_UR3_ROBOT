@@ -6,15 +6,46 @@ import rtde_io
 import socket
 import time
 
+from glob import glob
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+from DetectAndSortCube import CubeColorDetectorLive 
+import GetCubeOrientation as CubeOrientation
+
 # --- Netzwerkkonfiguration ---
 ROBOT3_IP = "192.168.0.17"
 ROBOT4_IP = "192.168.0.3"
 
-robot3Control = rtde_control.RTDEControlInterface(ROBOT3_IP)
-robot4Control = rtde_control.RTDEControlInterface(ROBOT4_IP)
+# robot3Control = rtde_control.RTDEControlInterface(ROBOT3_IP)
+# robot4Control = rtde_control.RTDEControlInterface(ROBOT4_IP)
 
-robot3Receive = rtde_receive.RTDEReceiveInterface(ROBOT3_IP)
-robot4Receive = rtde_receive.RTDEReceiveInterface(ROBOT4_IP)
+# robot3Receive = rtde_receive.RTDEReceiveInterface(ROBOT3_IP)
+# robot4Receive = rtde_receive.RTDEReceiveInterface(ROBOT4_IP)
+
+def IR_test():
+    # Schritt 1 Fotos machen und speichern
+    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test1\*.jpg"
+    print("Loading images")
+    imgs = glob(image_path)
+
+    model_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\models\best.pt"
+    detector = CubeColorDetectorLive(model_path, cam_index=1)
+
+    image1 = detector.detect_from_image(imgs[0])
+    image2 = detector.detect_from_image(imgs[1])
+    image3 = detector.detect_from_image(imgs[2])
+    image4 = detector.detect_from_image(imgs[3])
+    image5 = detector.detect_from_image(imgs[4])
+    image6 = detector.detect_from_image(imgs[5])
+    print(image1)
+    print(image2)
+    print(image3)
+    print(image4)
+    print(image5)
+    print(image6) 
+
+    # Schritt 2 Bilder auswerten
 
 
 
@@ -45,4 +76,5 @@ def testMain():
 #   STARTE PROGRAMM
 ############################################################################################
 if __name__ == "__main__":
-    testMain()
+    # testMain()
+    IR_test()

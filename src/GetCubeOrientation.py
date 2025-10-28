@@ -101,3 +101,165 @@ def rotate_cube_ksys(cube_ksys:dict, rotation: dict)->dict:
     }
 
     return cube_ksys_new
+
+def get_corrected_color_matrix(cube_ksys:dict, image:dict):
+
+    color_string = image["matrix"]
+    color_matrix = np.array(list(color_string)).reshape((3, 3))
+
+    print("Image axis: ", image["axis"])
+
+    if image["axis"] == "x" or image["axis"] == "-x":
+        # so weit drehen, dass z = [-1,0,0]
+        z = cube_ksys["z"]
+        if (z == [-1,0,0]).all():
+            print("Keine Rotation nötig")
+            corrected_matrix = color_matrix
+        elif (z == [0,1,0]).all():
+            # eine Drehung um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=1)
+        elif (z == [1,0,0]).all():
+            # zwei Drehungen um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=2)
+        elif (z == [0,-1,0]).all():
+            # drei Drehungen um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=3)
+
+    elif image["axis"] == "y" or image["axis"] == "-y":
+        # so weit drehen, dass z = [-1,0,0]
+        z = cube_ksys["z"]
+        if (z == [-1,0,0]).all():
+            # passt schon, keine Drehung nötig
+            print("Keine Rotation nötig")
+            corrected_matrix = color_matrix
+        elif (z == [0,1,0]).all():
+            # eine Drehung um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=1)
+        elif (z == [1,0,0]).all():
+            # zwei Drehungen um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=2)
+        elif (z == [0,-1,0]).all():
+            # eine Drehung um 90° nach rechts nötig
+            corrected_matrix = np.rot90(color_matrix, k=3)
+
+    elif image["axis"] == "z" or image["axis"] == "-z":
+        # so weit drehen, dass y = [0,1,0]
+        y = cube_ksys["y"]
+        if (y == [0,1,0]).all():
+            # passt schon
+            print("Keine Rotation nötig")
+            corrected_matrix = color_matrix
+        elif (y == [-1,0,0]).all():
+            # eine Drehung um 90° nach rechts nötig
+            corrected_matrix = np.rot90(color_matrix, k=3)
+        elif (y == [1,0,0]).all():
+            # eine Drehung um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=1)
+        elif (y == [0,-1,0]).all():
+            # zwei Drehungen um 90° nach links nötig
+            corrected_matrix = np.rot90(color_matrix, k=2)
+
+    corrected_color_string = ''.join(corrected_matrix.flatten())
+    return corrected_color_string
+
+def get_final_color_string(images:list[dict], rotations:list[dict])->str:
+    result = list("WWWWWWWWWOOOOOOOOOGGGGGGGGGRRRRRRRRRBBBBBBBBBYYYYYYYYY")
+
+    image1 = images[0]
+    rotation1 = rotations[0]
+    image2 = images[1]
+    rotation2 = rotations[1]
+    image3 = images[2]
+    rotation3 = rotations[2]
+    image4 = images[3]
+    rotation4 = rotations[3]
+    image5 = images[4]
+    rotation5 = rotations[4]
+    image6 = images[5]
+
+    # 1: Bild 1 auswerten
+    image1["axis"] = FACE_AXIS.get(image1["parentcolor"])
+    image1["orientation"] = GLOBAL_KSYS.get("z")
+
+    # 2: Erste Rotation anwenden
+    M_rot_1 = get_rotation_matrix(rotation1["axis"], rotation1["steps"])
+    image1["orientation"] = rotate_axis(image1["orientation"], M_rot_1)
+
+    # 3: Bild 2 auswerten
+    image2["axis"] = FACE_AXIS.get(image2["parentcolor"])
+    image2["orientation"] = GLOBAL_KSYS.get("z")
+
+    # 4: Orientierung ermitteln
+    cube_ksys = get_cube_ksys(image1, image2)
+
+    # 5: Farbmatrix von Bild 1 korrigieren
+    backwards_rotation1 = {
+        "axis": rotation1["axis"],
+        "steps": -rotation1["steps"]
+    }
+    M_rot_1_inverted = get_rotation_matrix(backwards_rotation1["axis"], backwards_rotation1["steps"])
+    previous_cube_x = rotate_axis(cube_ksys["x"], M_rot_1_inverted).astype(int)
+    previous_cube_y = rotate_axis(cube_ksys["y"], M_rot_1_inverted).astype(int)
+    previous_cube_z = rotate_axis(cube_ksys["z"], M_rot_1_inverted).astype(int)
+    previous_cube_ksys = {
+        "x": previous_cube_x,
+        "y": previous_cube_y,
+        "z": previous_cube_z
+    }
+    corrected_color_matrix_1 = get_corrected_color_matrix(previous_cube_ksys, image1)
+    image1["matrix"] = corrected_color_matrix_1
+
+    # 6: Farbmatrix für Bild 2 korrigieren
+    corrected_color_matrix_2 = get_corrected_color_matrix(cube_ksys, image2)
+    image2["matrix"] = corrected_color_matrix_2
+
+    # 7: Rotation 2 anwenden
+    cube_ksys = rotate_cube_ksys(cube_ksys, rotation2)
+
+    # 8: nächstes Bild auswerten
+    image3["axis"] = FACE_AXIS.get(image3["parentcolor"])
+    corrected_color_matrix_3 = get_corrected_color_matrix(cube_ksys, image3)
+    image3["matrix"] = corrected_color_matrix_3
+
+    # 9: Rotation 3 + Bild 4
+    cube_ksys = rotate_cube_ksys(cube_ksys, rotation3)
+    image4["axis"] = FACE_AXIS.get(image4["parentcolor"])
+    corrected_color_matrix_4 = get_corrected_color_matrix(cube_ksys, image4)
+    image4["matrix"] = corrected_color_matrix_4
+
+    # 10: Rotation 4 + Bild 5
+    cube_ksys = rotate_cube_ksys(cube_ksys, rotation4)
+    image5["axis"] = FACE_AXIS.get(image5["parentcolor"])
+    corrected_color_matrix_5 = get_corrected_color_matrix(cube_ksys, image5)
+    image5["matrix"] = corrected_color_matrix_5
+
+    # 11: Rotation 5 + Bild 6
+    cube_ksys = rotate_cube_ksys(cube_ksys, rotation5)
+    image6["axis"] = FACE_AXIS.get(image6["parentcolor"])
+    corrected_color_matrix_6 = get_corrected_color_matrix(cube_ksys, image6)
+    image6["matrix"] = corrected_color_matrix_6
+
+    # 12 Auf Array mappen
+    for image in images:
+        # print(image["matrix"])
+        if image["parentcolor"] == "W":
+            # print(result[0:9], " to ", image["matrix"])
+            result[0:9] = image["matrix"]
+        elif image["parentcolor"] == "O":
+            # print(result[9:18], " to ", image["matrix"])
+            result[9:18] = image["matrix"]
+        elif image["parentcolor"] == "G":
+            # print(result[18:27], " to ", image["matrix"])
+            result[18:27] = image["matrix"]
+        elif image["parentcolor"] == "R":
+            # print(result[27:36], " to ", image["matrix"])
+            result[27:36] = image["matrix"]
+        elif image["parentcolor"] == "B":
+            # print(result[36:45], " to ", image["matrix"])
+            result[36:45] = image["matrix"]
+        elif image["parentcolor"] == "Y":
+            # print(result[45:54], " to ", image["matrix"])
+            result[45:54] = image["matrix"]
+
+    result = "".join(result)
+    return result

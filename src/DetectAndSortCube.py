@@ -20,6 +20,7 @@ class CubeColorDetectorLive:
     """Erkennt Würfelseite über Live-Kamera und gibt sie als Dictionary zurück."""
 
     def __init__(self, model_path: str, conf_threshold: float = 0.6, cam_index: int = 2):
+        print("Initialize model")
         self.model = YOLO(model_path)
         self.conf_threshold = conf_threshold
         self.cam_index = cam_index
@@ -82,6 +83,33 @@ class CubeColorDetectorLive:
         dets_rot = self._normalize_orientation(dets)
         grid = self._build_color_grid(dets_rot)
         return grid
+
+    def detect_from_image(self, source:str)->dict:
+        """Wertet ein statisches Bild aus"""
+        
+        result_dict = None
+        print("get prediction from model")
+        result = self.model.predict(source)
+
+        print("postprocessing prediction...")
+        detections = []
+        for box in result[0].boxes:
+            x1, y1, x2, y2 = box.xyxy[0]
+            cls = int(box.cls[0])
+            label = self.model.names[cls]
+            w, h = (x2 - x1).item(), (y2 - y1).item()
+            x_c, y_c = (x1 + w / 2).item(), (y1 + h / 2).item()
+            detections.append((x_c, y_c, w, h, label))
+        
+        print("calculationg result dictionary...")
+        grid = self._process_cube_side(detections)
+        if grid:
+            matrix = "".join("".join(row) for row in grid)
+            parentcolor = grid[1][1]
+            result_dict = {"parentcolor": parentcolor, "matrix": matrix}
+            print("✅ Würfelseite erkannt:", result_dict)
+
+        return result_dict
 
     def detect_from_camera(self) -> dict | None:
         """Startet Kamera (index=2), zeigt YOLO-Detections live und gibt Ergebnis zurück, wenn 9 Felder erkannt."""
