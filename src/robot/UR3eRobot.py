@@ -9,6 +9,8 @@ class UR3eRobot:
         self.rtdeReceive = rtdeReceive
         self.robotiqGripper = robotiqGripper
         self.homePosition = homePosition
+        
+        self.moveL(self.homePosition, 0.3, 0.1)
 
     def getActualTCPPose(self):
         return  self.rtdeReceive.getActualTCPPose()
