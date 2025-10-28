@@ -21,6 +21,18 @@ Mithilfe einer Kamera und zwei UR3e soll ein Rubik's Cube gelöst werden. Der W�
     - Wo besteht weiterer Zeitbedarf?
     - Sind neue Problemstellungen aufgetaucht?
 - [ ] **KW 5**: Prüfung / Präsentation
+
+## Aktueller Stand
+- **Würfelerkennung** funktioniert in erster Version 
+    - Würfel wird zuerst nur erkannt (inkl. Orientierung), um dann gegriffen werden zu können
+    - Seitenerkennung erfolgt in Roboterhand → Roboter fährt unter konstante Position unterhalb der Kamera
+- **Würfelorientierung** funktioniert in erster Version, **Dazu muss von der Steuerungsgruppe die Rotation mitübergeben werden!**
+    - z.B. ```rotation = {"axis":"x", "steps": 1}```
+    - String kann korrekt an Algorithmus übergeben werden
+- **Lösungsalgorithmus**: ist fertig
+    - gibt max 45 Züge zurück
+    - gibt einen String mit Drehbefehlen zurück, z.B. ```"U' R L R2 B F L2"```
+
 ## Ein paar nützliche Git-Befehle ...
 ```bash
 git status      # überprüft den aktuellen Status (Welche Dateien wurden geändert?)
