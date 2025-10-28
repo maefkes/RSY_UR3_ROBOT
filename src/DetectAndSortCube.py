@@ -136,7 +136,7 @@ class CubeColorDetectorLive:
 
 # === Testlauf ===
 if __name__ == "__main__":
-    model_path = r"C:\Users\larsb\Desktop\Unterlagen\RSY\YOLO_Cube\train_results\farben\Farben\weights\best.pt"
-    detector = CubeColorDetectorLive(model_path, cam_index=2)
+    model_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\models\best.pt"
+    detector = CubeColorDetectorLive(model_path, cam_index=1)
     result = detector.detect_from_camera()
     print("📦 Endergebnis:", result)
