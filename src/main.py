@@ -1,6 +1,7 @@
 import sys
 import socket
 import time
+import math
 
 from UR3eRobotInitialisation import robot3, robot4
 
@@ -9,32 +10,37 @@ from UR3eRobotInitialisation import robot3, robot4
 
 
 def testMain():
+    
+        # === Bewegungsparameter ===
+    speed = 0.3         # rad/s
+    acceleration = 0.8  # rad/s²
 
-    speed = 0.3
-    acc = 0.1
+    # === Aktuelle Gelenkposition holen ===
+    joints = robot3.getActualQ()
+    print("Aktuelle Gelenkwinkel [rad]:", [round(j, 3) for j in joints])
+
+        # === Beispielbewegungen ===
+    # +10° auf Achse 1
+    robot3.move_joint_axis(0, math.radians(5))
+
+    # -5° auf Achse 2
+    robot3.move_joint_axis(1, math.radians(5))
+
+    # +15° auf Achse 6
+    robot3.move_joint_axis(5, math.radians(5))
+
+    home_joints = [0, -1.5708, 0, -1.5708, 0, 0]
+    robot3.moveJ(home_joints, speed, acceleration)
+
+    robot3.move_joint_axis(5, math.radians(90))
+
+    robot3.move_joint_axis(5, math.radians(-90))
+
+    # === Zur Ausgangsposition zurückkehren ===
+    print("Zur Ausgangsposition zurückkehren...")
+    robot3.moveJ(joints, speed, acceleration)
+
     
-    posRobot3 = robot3.getActualTCPPose()
-    '''
-    posRobot3[0] -=  0.001
-    posRobot3[1] -=  0.001
-    posRobot3[2] -=  0.001
-    posRobot3[3] -=  0.001
-    posRobot3[4] -=  0.001
-    posRobot3[5] -=  0.001
-    '''
-    robot3.moveL(posRobot3, speed, acc)
-    
-    posRobot4 = robot4.getActualTCPPose()
-    
-    '''
-    posRobot4[0] -= 0.001
-    posRobot4[1] -= 0.001
-    posRobot4[2] -= 0.001
-    posRobot4[3] -= 0.001
-    posRobot4[4] -= 0.001
-    posRobot4[5] -= 0.
-    '''
-    robot4.moveL(posRobot4, speed, acc)
     
     
     
