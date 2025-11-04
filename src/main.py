@@ -2,7 +2,7 @@ import sys
 import socket
 import time
 
-from robot.UR3eRobotInitialisation import robot3, robot4
+from UR3eRobotInitialisation import robot3, robot4
 
 
 
