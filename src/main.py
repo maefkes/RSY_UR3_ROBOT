@@ -10,7 +10,7 @@ from glob import glob
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from DetectAndSortCube import CubeColorDetectorLive 
+from DetectAndSortCube_fixed import CubeColorDetectorLive 
 import GetCubeOrientation as CubeOrientation
 
 # --- Netzwerkkonfiguration ---
