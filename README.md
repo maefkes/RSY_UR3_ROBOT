@@ -16,10 +16,14 @@ Mithilfe einer Kamera und zwei UR3e soll ein Rubik's Cube gelöst werden. Der W�
 - sequence_of_operations (JH)
 - solution_algorithm (GT)
 ## Meilensteine
-- [ ] **KW 45**: Erste Zwischenbesprechung zum aktuellen Stand der Branches
+- [x] **KW 45**: Erste Zwischenbesprechung zum aktuellen Stand der Branches
     - Welche Branches können schon zusammengeführt werden?
     - Wo besteht weiterer Zeitbedarf?
     - Sind neue Problemstellungen aufgetaucht?
+- [ ] **KW 47**: Nächste Besprechung
+    - Kamera + Orientierung + Lösungsalgorithmus
+    - Motion Control + Sequence of Operations
+    - Simulation
 - [ ] **KW 5**: Prüfung / Präsentation
 
 ## Aktueller Stand
@@ -32,6 +36,12 @@ Mithilfe einer Kamera und zwei UR3e soll ein Rubik's Cube gelöst werden. Der W�
 - **Lösungsalgorithmus**: ist fertig
     - gibt max 45 Züge zurück
     - gibt einen String mit Drehbefehlen zurück, z.B. ```"U' R L R2 B F L2"```
+- **Simulation**: Lizenzkey ist da Copedia
+- **Motion Control**: MoveL funktioniert, Probleme mit Achsweise Bewegung (Ansatz Jesse)
+- **KSYS**: 
+    - Roboter bleiben in eigenem System
+    - Bewegung ist hartkodiert
+    - Sicherheitskoordinate / Punkt / Ebene hartkodieren
 
 ## Ein paar nützliche Git-Befehle ...
 ```bash
