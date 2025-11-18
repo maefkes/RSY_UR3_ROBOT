@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from DetectAndSortCube_fixed import CubeColorDetectorLive 
 import GetCubeOrientation as CubeOrientation
+import CubeSolver
 
 # --- Netzwerkkonfiguration ---
 ROBOT3_IP = "192.168.0.17"
@@ -69,8 +70,12 @@ def IR_test():
     rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]
 
     # Schritt 2 Bilder auswerten
-    result = CubeOrientation.get_final_color_string(images, rotations)
-    print(result)
+    cube = CubeOrientation.get_final_color_string(images, rotations)
+    # print(result)
+
+    solution = CubeSolver.get_Cube_Solution(cube.upper())
+
+    print(solution)
 
 
 def testMain():
