@@ -31,8 +31,7 @@ class MainWindow(QTabWidget):
         # Managers
         self.settingsManager = SettingsManager()
         self.teachPositionManager = TeachPositionManager(self.homePosRobot3, self.homePosRobot4)
-        self.controller = Controller()
-
+        
         # Controller timer
         self.controllerTimer = QtCore.QTimer()
         self.controllerTimer.timeout.connect(self.pollController)
@@ -58,7 +57,7 @@ class MainWindow(QTabWidget):
         # Robot instances
         self.robot3 = None
         self.robot4 = None
-        self.moveRobot = None
+        self.controller = None
         self.gripper = None
 
 
@@ -87,6 +86,24 @@ class MainWindow(QTabWidget):
 
         groupRobots.setLayout(layoutRobots)
         layout.addWidget(groupRobots)
+        
+        # ------------------------------------------
+        # Controller Initialisierung
+        # ------------------------------------------
+        groupController = QGroupBox("Controller – Initialisierung")
+        layoutController = QGridLayout()
+
+        self.btn_init_controller = QPushButton("Controller verbinden")
+        self.btn_init_controller.clicked.connect(self.initializeController)
+
+        self.label_controller_status = QLabel("Status: Kein Controller verbunden")
+
+        layoutController.addWidget(self.btn_init_controller, 0, 0)
+        layoutController.addWidget(self.label_controller_status, 1, 0)
+
+        groupController.setLayout(layoutController)
+        layout.addWidget(groupController)
+
 
         self.start.setLayout(layout)
 
@@ -131,6 +148,15 @@ class MainWindow(QTabWidget):
 
         self.label_robot_status.setText(f"Status: Roboter {robotNumber} erfolgreich initialisiert")
         print(f"Roboter {robotNumber} initialisiert.")
+        
+    def initializeController(self):
+            try:
+                self.controller = Controller()
+                self.label_controller_status.setText("Status: Controller erfolgreich verbunden")
+                print("Controller erfolgreich verbunden.")
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Controller konnte nicht verbunden werden:\n{e}")
+
 
 
     # ------------------------------------------------------------
