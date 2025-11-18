@@ -20,7 +20,7 @@ class CubeColorDetectorLive:
     """Erkennt Würfelseite über Live-Kamera und gibt sie als Dictionary zurück."""
 
     def __init__(self, model_path: str, conf_threshold: float = 0.6, cam_index: int = 2):
-        print("Initialize model")
+        # print("Initialize model")
         self.model = YOLO(model_path)
         self.conf_threshold = conf_threshold
         self.cam_index = cam_index
@@ -88,10 +88,10 @@ class CubeColorDetectorLive:
         """Wertet ein statisches Bild aus"""
         
         result_dict = None
-        print("get prediction from model")
+        # print("get prediction from model")
         result = self.model.predict(source)
 
-        print("postprocessing prediction...")
+        # print("postprocessing prediction...")
         detections = []
         for box in result[0].boxes:
             x1, y1, x2, y2 = box.xyxy[0]
@@ -101,13 +101,13 @@ class CubeColorDetectorLive:
             x_c, y_c = (x1 + w / 2).item(), (y1 + h / 2).item()
             detections.append((x_c, y_c, w, h, label))
         
-        print("calculationg result dictionary...")
+        # print("calculationg result dictionary...")
         grid = self._process_cube_side(detections)
         if grid:
             matrix = "".join("".join(row) for row in grid)
             parentcolor = grid[1][1]
             result_dict = {"parentcolor": parentcolor, "matrix": matrix}
-            print("✅ Würfelseite erkannt:", result_dict)
+            # print("✅ Würfelseite erkannt:", result_dict)
 
         return result_dict
 
@@ -115,11 +115,11 @@ class CubeColorDetectorLive:
         """Startet Kamera (index=2), zeigt YOLO-Detections live und gibt Ergebnis zurück, wenn 9 Felder erkannt."""
         cap = cv2.VideoCapture(self.cam_index)
         if not cap.isOpened():
-            print("❌ Keine Kamera gefunden.")
+            # print("❌ Keine Kamera gefunden.")
             return None
 
-        print("🎥 Kamera gestartet – halte eine Würfelseite ins Bild.")
-        print("Warte auf genau 9 erkannte Flächen ... (Taste [q] beendet)")
+        # print("🎥 Kamera gestartet – halte eine Würfelseite ins Bild.")
+        # print("Warte auf genau 9 erkannte Flächen ... (Taste [q] beendet)")
 
         result_dict = None
         FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -127,7 +127,7 @@ class CubeColorDetectorLive:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("❌ Kein Frame empfangen.")
+                # print("❌ Kein Frame empfangen.")
                 break
 
             results = self.model.predict(source=frame, conf=self.conf_threshold, verbose=False)
@@ -149,7 +149,7 @@ class CubeColorDetectorLive:
                 matrix = "".join("".join(row) for row in grid)
                 parentcolor = grid[1][1]
                 result_dict = {"parentcolor": parentcolor, "matrix": matrix}
-                print("✅ Würfelseite erkannt:", result_dict)
+                # print("✅ Würfelseite erkannt:", result_dict)
                 break
 
             cv2.imshow("🧩 Cube Live Feed (YOLO)", frame)
@@ -167,4 +167,4 @@ if __name__ == "__main__":
     model_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\models\best.pt"
     detector = CubeColorDetectorLive(model_path, cam_index=1)
     result = detector.detect_from_camera()
-    print("📦 Endergebnis:", result)
+    # print("📦 Endergebnis:", result)

@@ -25,7 +25,7 @@ ROBOT4_IP = "192.168.0.3"
 
 def IR_test():
     # Schritt 1 Fotos machen und speichern
-    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test1\*.jpg"
+    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test2\*.jpg"
     print("Loading images")
     imgs = glob(image_path)
 
@@ -38,15 +38,39 @@ def IR_test():
     image4 = detector.detect_from_image(imgs[3])
     image5 = detector.detect_from_image(imgs[4])
     image6 = detector.detect_from_image(imgs[5])
-    print(image1)
-    print(image2)
-    print(image3)
-    print(image4)
-    print(image5)
-    print(image6) 
+
+    # image1["axis"] = CubeOrientation.FACE_AXIS.get(image1["parentcolor"].upper())
+    # image2["axis"] = CubeOrientation.FACE_AXIS.get(image2["parentcolor"].upper())
+    # image3["axis"] = CubeOrientation.FACE_AXIS.get(image3["parentcolor"].upper())
+    # image4["axis"] = CubeOrientation.FACE_AXIS.get(image4["parentcolor"].upper())
+    # image5["axis"] = CubeOrientation.FACE_AXIS.get(image5["parentcolor"].upper())
+    # image6["axis"] = CubeOrientation.FACE_AXIS.get(image6["parentcolor"].upper())
+
+    
+    # print(image1["axis"][0])
+    # print(image2["axis"][0])
+    # print(image3["axis"][0])
+    # print(image4["axis"][0])
+    # print(image5["axis"][0])
+    # print(image6["axis"][0])
+
+    print(image1.keys())
+
+    images = [image1, image2, image3, image4, image5, image6]
+
+    print(images[0].keys())
+
+    rotation1 = {"axis": "x", "steps": 1}
+    rotation2 = {"axis": "y", "steps": 2}
+    rotation3 = {"axis": "x", "steps": 1}
+    rotation4 = {"axis": "y", "steps": 1}
+    rotation5 = {"axis": "y", "steps": 2}
+
+    rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]
 
     # Schritt 2 Bilder auswerten
-
+    result = CubeOrientation.get_final_color_string(images, rotations)
+    print(result)
 
 
 def testMain():
