@@ -1,5 +1,5 @@
 ############################################################
-#  RobotiqGripper.py
+#  robotiq_gripper_simu.py
 #  Greiferklasse für den realen Roboter
 #  02-Mai-2025 09:58:00
 ############################################################
@@ -12,7 +12,7 @@ import time
 from enum import Enum
 from typing import Union, Tuple, OrderedDict
 
-class RobotiqGripper:
+class RobotiqGripperReal:
     """
     Communicates with the gripper directly, via socket with string commands, leveraging string names for variables.
     """
@@ -201,7 +201,7 @@ class RobotiqGripper:
     def is_active(self):
         """Returns whether the gripper is active."""
         status = self._get_var(self.STA)
-        return RobotiqGripper.GripperStatus(status) == RobotiqGripper.GripperStatus.ACTIVE
+        return RobotiqGripperReal.GripperStatus(status) == RobotiqGripperReal.GripperStatus.ACTIVE
 
     def get_min_position(self) -> int:
         """Returns the minimum position the gripper can reach (open position)."""
@@ -238,19 +238,19 @@ class RobotiqGripper:
         """
         # first try to open in case we are holding an object
         (position, status) = self.move_and_wait_for_pos(self.get_open_position(), 64, 1)
-        if RobotiqGripper.ObjectStatus(status) != RobotiqGripper.ObjectStatus.AT_DEST:
+        if RobotiqGripperReal.ObjectStatus(status) != RobotiqGripperReal.ObjectStatus.AT_DEST:
             raise RuntimeError(f"Calibration failed opening to start: {str(status)}")
 
         # try to close as far as possible, and record the number
         (position, status) = self.move_and_wait_for_pos(self.get_closed_position(), 64, 1)
-        if RobotiqGripper.ObjectStatus(status) != RobotiqGripper.ObjectStatus.AT_DEST:
+        if RobotiqGripperReal.ObjectStatus(status) != RobotiqGripperReal.ObjectStatus.AT_DEST:
             raise RuntimeError(f"Calibration failed because of an object: {str(status)}")
         assert position <= self._max_position
         self._max_position = position
 
         # try to open as far as possible, and record the number
         (position, status) = self.move_and_wait_for_pos(self.get_open_position(), 64, 1)
-        if RobotiqGripper.ObjectStatus(status) != RobotiqGripper.ObjectStatus.AT_DEST:
+        if RobotiqGripperReal.ObjectStatus(status) != RobotiqGripperReal.ObjectStatus.AT_DEST:
             raise RuntimeError(f"Calibration failed because of an object: {str(status)}")
         assert position >= self._min_position
         self._min_position = position
@@ -300,10 +300,10 @@ class RobotiqGripper:
 
         # wait until not moving
         cur_obj = self._get_var(self.OBJ)
-        while RobotiqGripper.ObjectStatus(cur_obj) == RobotiqGripper.ObjectStatus.MOVING:
+        while RobotiqGripperReal.ObjectStatus(cur_obj) == RobotiqGripperReal.ObjectStatus.MOVING:
             cur_obj = self._get_var(self.OBJ)
 
         # report the actual position and the object status
         final_pos = self._get_var(self.POS)
         final_obj = cur_obj
-        return final_pos, RobotiqGripper.ObjectStatus(final_obj)
+        return final_pos, RobotiqGripperReal.ObjectStatus(final_obj)
