@@ -8,7 +8,8 @@ class UR3eRobot:
 
         self.rtdeControl = rtdeControl
         self.rtdeReceive = rtdeReceive
-        self.robotiqGripper = robotiqGripper
+        self.robotiqGripper = robotiqGripper  
+        self.gripper = robotiqGripper         
         self.manager = settingsManager
         self.homePosition = homePosition
         
@@ -54,6 +55,9 @@ class UR3eRobot:
 
     def moveJ(self, position, speed, acc):
         self.rtdeControl.moveJ(position, speed, acc)
+        
+    def speedL(self, velocity_vector):
+        self.rtdeControl.speedL(velocity_vector, 0.6, 0.1)
 
     def getActualQ(self):
         return self.rtdeReceive.getActualQ()
