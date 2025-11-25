@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 from DetectAndSortCube_fixed import CubeColorDetectorLive 
 import GetCubeOrientation as CubeOrientation
 import CubeSolver
+import ConvertSolutionString as SolutionConverter
 
 # --- Netzwerkkonfiguration ---
 ROBOT3_IP = "192.168.0.17"
@@ -38,57 +39,43 @@ ROBOT4_IP = "192.168.0.3"
 # robot4Receive = rtde_receive.RTDEReceiveInterface(ROBOT4_IP)
 
 def IR_test():
-    # Schritt 1 Fotos machen und speichern
+    # 1: Fotos laden
     image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test3\*.jpg"
     print("Loading images")
     imgs = glob(image_path)
 
+    # 2: Cube Detector initialisieren
     model_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\models\best.pt"
     detector = CubeColorDetectorLive(model_path, cam_index=1)
 
+    # 3: Detector Ergebnisse speichern
     image1 = detector.detect_from_image(imgs[0])
     image2 = detector.detect_from_image(imgs[1])
     image3 = detector.detect_from_image(imgs[2])
     image4 = detector.detect_from_image(imgs[3])
     image5 = detector.detect_from_image(imgs[4])
     image6 = detector.detect_from_image(imgs[5])
-
-    # image1["axis"] = CubeOrientation.FACE_AXIS.get(image1["parentcolor"].upper())
-    # image2["axis"] = CubeOrientation.FACE_AXIS.get(image2["parentcolor"].upper())
-    # image3["axis"] = CubeOrientation.FACE_AXIS.get(image3["parentcolor"].upper())
-    # image4["axis"] = CubeOrientation.FACE_AXIS.get(image4["parentcolor"].upper())
-    # image5["axis"] = CubeOrientation.FACE_AXIS.get(image5["parentcolor"].upper())
-    # image6["axis"] = CubeOrientation.FACE_AXIS.get(image6["parentcolor"].upper())
-
-    
-    # print(image1["axis"][0])
-    # print(image2["axis"][0])
-    # print(image3["axis"][0])
-    # print(image4["axis"][0])
-    # print(image5["axis"][0])
-    # print(image6["axis"][0])
-
     print(image1.keys())
-
     images = [image1, image2, image3, image4, image5, image6]
 
-    print(images[0].keys())
-
+    # 4: Rotationen speichern
     rotation1 = {"axis": "y", "steps": 1}
     rotation2 = {"axis": "x", "steps": 2}
     rotation3 = {"axis": "y", "steps": 1}
     rotation4 = {"axis": "x", "steps": 1}
     rotation5 = {"axis": "y", "steps": 2}
-
     rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]
 
-    # Schritt 2 Bilder auswerten
+    # 5: Cube String ermitteln
     cube = CubeOrientation.get_final_color_string(images, rotations)
-    # print(result)
 
+    # 6: Cube Lösung ermitteln
     solution = CubeSolver.get_Cube_Solution(cube.upper())
-
     print(solution)
+
+    # 7: Lösung für die Roboter konvertieren
+    converted_solution = SolutionConverter.Convert_Solution_String(solution)
+    print(converted_solution)
 
 
 def testMain():
