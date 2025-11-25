@@ -169,17 +169,21 @@ class TestGui(QTabWidget):
     def initializeRobot(self, robotNumber):
         ip = "192.168.0.3" if robotNumber == 3 else "192.168.0.17"
         homePos = self.homePosRobot3 if robotNumber == 3 else self.homePosRobot4
+        robotName = f"robot{robotNumber}"
 
         try:
             gripperTemplate = RobotiqGripperReal(ip)
             robotControl = rtde_control.RTDEControlInterface(ip)
             robotReceive = rtde_receive.RTDEReceiveInterface(ip)
 
-            robotiqGripper = Gripper(f"robot{robotNumber}", gripperTemplate, self.settingsManager)
+            # Gripper-Instanz mit SettingsManager
+            robotiqGripper = Gripper(robotName, gripperTemplate, self.settingsManager)
             robotiqGripper.initialise()
 
-            robot = UR3eRobot(robotControl, robotReceive, robotiqGripper, self.settingsManager, homePos)
-            robot.name = f"robot{robotNumber}"
+            # Roboter-Instanz mit eigener Settings-Kopie
+            robot = UR3eRobot(robotControl, robotReceive, robotiqGripper, self.settingsManager, homePos, robotName)
+            robot.name = robotName
+
         except Exception as e:
             QMessageBox.critical(self, "Fehler", f"Roboter {robotNumber} konnte nicht initialisiert werden:\n{e}")
             return
@@ -191,6 +195,7 @@ class TestGui(QTabWidget):
 
         self.label_robot_status.setText(f"Status: Roboter {robotNumber} erfolgreich initialisiert")
         print(f"Roboter {robotNumber} initialisiert.")
+
 
     def initializeController(self):
         try:
@@ -434,4 +439,148 @@ class TestGui(QTabWidget):
 
     # -------------------- Einstellungen --------------------
     def settingsTab(self):
-        pass
+        mainLayout = QVBoxLayout()
+
+        # ================= Roboter 3 =================
+        groupRobot3 = QGroupBox("Roboter 3 Einstellungen")
+        layoutR3 = QGridLayout()
+
+        # Achsen
+        layoutR3.addWidget(QLabel("Achsen - Geschwindigkeit:"), 0, 0)
+        self.spin_r3_axis_speed = QtWidgets.QDoubleSpinBox()
+        self.spin_r3_axis_speed.setRange(0.0, 1.0)
+        self.spin_r3_axis_speed.setSingleStep(0.01)
+        self.spin_r3_axis_speed.setValue(self.settingsManager.get("robot3", "axis", "SPEED"))
+        self.spin_r3_axis_speed.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot3", "axis", "SPEED", val)
+        )
+        layoutR3.addWidget(self.spin_r3_axis_speed, 0, 1)
+
+        layoutR3.addWidget(QLabel("Achsen - Beschleunigung:"), 1, 0)
+        self.spin_r3_axis_acc = QtWidgets.QDoubleSpinBox()
+        self.spin_r3_axis_acc.setRange(0.0, 1.0)
+        self.spin_r3_axis_acc.setSingleStep(0.01)
+        self.spin_r3_axis_acc.setValue(self.settingsManager.get("robot3", "axis", "ACCELERATION"))
+        self.spin_r3_axis_acc.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot3", "axis", "ACCELERATION", val)
+        )
+        layoutR3.addWidget(self.spin_r3_axis_acc, 1, 1)
+
+        # Greifer
+        layoutR3.addWidget(QLabel("Greifer - Kraft:"), 2, 0)
+        self.slider_r3_force = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.slider_r3_force.setRange(0, 255)
+        self.slider_r3_force.setValue(self.settingsManager.get("robot3", "gripper", "FORCE"))
+        self.slider_r3_force.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot3", "gripper", "FORCE", val)
+        )
+        layoutR3.addWidget(self.slider_r3_force, 2, 1)
+
+        layoutR3.addWidget(QLabel("Greifer - Geschwindigkeit:"), 3, 0)
+        self.slider_r3_speed = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.slider_r3_speed.setRange(0, 255)
+        self.slider_r3_speed.setValue(self.settingsManager.get("robot3", "gripper", "SPEED"))
+        self.slider_r3_speed.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot3", "gripper", "SPEED", val)
+        )
+        layoutR3.addWidget(self.slider_r3_speed, 3, 1)
+
+        layoutR3.addWidget(QLabel("Greifer - Position:"), 4, 0)
+        self.slider_r3_position = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.slider_r3_position.setRange(0, 255)
+        self.slider_r3_position.setValue(self.settingsManager.get("robot3", "gripper", "POSITION"))
+        self.slider_r3_position.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot3", "gripper", "POSITION", val)
+        )
+        layoutR3.addWidget(self.slider_r3_position, 4, 1)
+
+        groupRobot3.setLayout(layoutR3)
+        mainLayout.addWidget(groupRobot3)
+
+        # ================= Roboter 4 =================
+        groupRobot4 = QGroupBox("Roboter 4 Einstellungen")
+        layoutR4 = QGridLayout()
+
+        # Achsen
+        layoutR4.addWidget(QLabel("Achsen - Geschwindigkeit:"), 0, 0)
+        self.spin_r4_axis_speed = QtWidgets.QDoubleSpinBox()
+        self.spin_r4_axis_speed.setRange(0.0, 1.0)
+        self.spin_r4_axis_speed.setSingleStep(0.01)
+        self.spin_r4_axis_speed.setValue(self.settingsManager.get("robot4", "axis", "SPEED"))
+        self.spin_r4_axis_speed.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot4", "axis", "SPEED", val)
+        )
+        layoutR4.addWidget(self.spin_r4_axis_speed, 0, 1)
+
+        layoutR4.addWidget(QLabel("Achsen - Beschleunigung:"), 1, 0)
+        self.spin_r4_axis_acc = QtWidgets.QDoubleSpinBox()
+        self.spin_r4_axis_acc.setRange(0.0, 1.0)
+        self.spin_r4_axis_acc.setSingleStep(0.01)
+        self.spin_r4_axis_acc.setValue(self.settingsManager.get("robot4", "axis", "ACCELERATION"))
+        self.spin_r4_axis_acc.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot4", "axis", "ACCELERATION", val)
+        )
+        layoutR4.addWidget(self.spin_r4_axis_acc, 1, 1)
+
+        # Greifer
+        layoutR4.addWidget(QLabel("Greifer - Kraft:"), 2, 0)
+        self.slider_r4_force = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.slider_r4_force.setRange(0, 255)
+        self.slider_r4_force.setValue(self.settingsManager.get("robot4", "gripper", "FORCE"))
+        self.slider_r4_force.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot4", "gripper", "FORCE", val)
+        )
+        layoutR4.addWidget(self.slider_r4_force, 2, 1)
+
+        layoutR4.addWidget(QLabel("Greifer - Geschwindigkeit:"), 3, 0)
+        self.slider_r4_speed = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.slider_r4_speed.setRange(0, 255)
+        self.slider_r4_speed.setValue(self.settingsManager.get("robot4", "gripper", "SPEED"))
+        self.slider_r4_speed.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot4", "gripper", "SPEED", val)
+        )
+        layoutR4.addWidget(self.slider_r4_speed, 3, 1)
+
+        layoutR4.addWidget(QLabel("Greifer - Position:"), 4, 0)
+        self.slider_r4_position = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.slider_r4_position.setRange(0, 255)
+        self.slider_r4_position.setValue(self.settingsManager.get("robot4", "gripper", "POSITION"))
+        self.slider_r4_position.valueChanged.connect(
+            lambda val: self.settingsManager.set("robot4", "gripper", "POSITION", val)
+        )
+        layoutR4.addWidget(self.slider_r4_position, 4, 1)
+
+        groupRobot4.setLayout(layoutR4)
+        mainLayout.addWidget(groupRobot4)
+
+        # Layout anwenden
+        self.settingsMode.setLayout(mainLayout)
+
+       
+
+    # -------------------- Hilfsmethoden --------------------
+    def updateSettingsWidgets(self, robotName):
+        """Lädt die aktuellen Werte des gewählten Roboters in die Widgets"""
+        self.spin_axis_speed.blockSignals(True)
+        self.spin_axis_acc.blockSignals(True)
+        self.slider_force.blockSignals(True)
+        self.slider_speed.blockSignals(True)
+        self.slider_position.blockSignals(True)
+
+        self.spin_axis_speed.setValue(self.settingsManager.get(robotName, 'axis', 'SPEED'))
+        self.spin_axis_acc.setValue(self.settingsManager.get(robotName, 'axis', 'ACCELERATION'))
+        self.slider_force.setValue(self.settingsManager.get(robotName, 'gripper', 'FORCE'))
+        self.slider_speed.setValue(self.settingsManager.get(robotName, 'gripper', 'SPEED'))
+        self.slider_position.setValue(self.settingsManager.get(robotName, 'gripper', 'POSITION'))
+
+        self.spin_axis_speed.blockSignals(False)
+        self.spin_axis_acc.blockSignals(False)
+        self.slider_force.blockSignals(False)
+        self.slider_speed.blockSignals(False)
+        self.slider_position.blockSignals(False)
+
+    def updateSetting(self, group, name, value):
+        """Speichert einen Wert in SettingsManager für den aktuell gewählten Roboter"""
+        robotName = self.combo_robot.currentText()
+        self.settingsManager.set(robotName, group, name, value)
+
