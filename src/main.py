@@ -1,23 +1,23 @@
-import sys
-import os
-from PyQt6 import QtWidgets
-from gui import MainWindow
+# import sys
+# import os
+# # from PyQt6 import QtWidgets
+# from gui import MainWindow
 
 
-SIMULATION = os.environ.get('SIMULATION', 'False') == 'True'
+# # SIMULATION = os.environ.get('SIMULATION', 'False') == 'True'
 
-def main():
-    app = QtWidgets.QApplication(sys.argv)
-    mainWin = MainWindow()
-    mainWin.show()
-    sys.exit(app.exec())
+# # def main():
+# #     app = QtWidgets.QApplication(sys.argv)
+# #     mainWin = MainWindow()
+# #     mainWin.show()
+# #     sys.exit(app.exec())
     
-import rtde_control  
-import rtde_receive
-import rtde_io
+# import rtde_control  
+# import rtde_receive
+# import rtde_io
 
-import socket
-import time
+# import socket
+# import time
 
 from glob import glob
 from PIL import Image
@@ -39,7 +39,7 @@ ROBOT4_IP = "192.168.0.3"
 
 def IR_test():
     # Schritt 1 Fotos machen und speichern
-    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test2\*.jpg"
+    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test3\*.jpg"
     print("Loading images")
     imgs = glob(image_path)
 
@@ -74,10 +74,10 @@ def IR_test():
 
     print(images[0].keys())
 
-    rotation1 = {"axis": "x", "steps": 1}
-    rotation2 = {"axis": "y", "steps": 2}
-    rotation3 = {"axis": "x", "steps": 1}
-    rotation4 = {"axis": "y", "steps": 1}
+    rotation1 = {"axis": "y", "steps": 1}
+    rotation2 = {"axis": "x", "steps": 2}
+    rotation3 = {"axis": "y", "steps": 1}
+    rotation4 = {"axis": "x", "steps": 1}
     rotation5 = {"axis": "y", "steps": 2}
 
     rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]

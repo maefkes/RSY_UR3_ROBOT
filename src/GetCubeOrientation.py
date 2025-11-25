@@ -113,22 +113,26 @@ def get_corrected_color_matrix(cube_ksys:dict, image:dict):
     color_string = image["matrix"]
     color_matrix = np.array(list(color_string)).reshape((3, 3))
 
-    # print("Image axis: ", image["axis"])
+    print("Image axis: ", image["axis"])
+    print(cube_ksys["z"])
 
     if image["axis"] == "x" or image["axis"] == "-x":
         # so weit drehen, dass z = [-1,0,0]
         z = cube_ksys["z"]
         if (z == [-1,0,0]).all():
-            # print("Keine Rotation nötig")
+            print("Keine Rotation nötig")
             corrected_matrix = color_matrix
         elif (z == [0,1,0]).all():
             # eine Drehung um 90° nach links nötig
+            print("eine Drehung um 90° nach links nötig")
             corrected_matrix = np.rot90(color_matrix, k=1)
         elif (z == [1,0,0]).all():
             # zwei Drehungen um 90° nach links nötig
+            print("zwei Drehungen um 90° nach links nötig")
             corrected_matrix = np.rot90(color_matrix, k=2)
         elif (z == [0,-1,0]).all():
             # drei Drehungen um 90° nach links nötig
+            print("drei Drehungen um 90° nach links nötig")
             corrected_matrix = np.rot90(color_matrix, k=3)
 
     elif image["axis"] == "y" or image["axis"] == "-y":
@@ -187,8 +191,11 @@ def get_final_color_string(images:list[dict], rotations:list[dict])->str:
     image1["axis"] = FACE_AXIS.get(image1["parentcolor"].upper())
     image1["orientation"] = GLOBAL_KSYS.get("z")
 
-    # print(image1.keys())
-    # print(image1["axis"])
+    print("DEBUG IMAGE 1: ")
+    print("Keys: ")
+    print(image1.keys())
+    print("Parentcolor: \t" + image1["parentcolor"])
+    print("Achse:       \t" + image1["axis"])
 
     # 2: Erste Rotation anwenden
     M_rot_1 = get_rotation_matrix(rotation1["axis"], rotation1["steps"])
