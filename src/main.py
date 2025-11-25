@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt6 import QtWidgets
-from testgui import TestGui
+from gui.testgui import TestGui
 
 
 SIMULATION = os.environ.get('SIMULATION', 'False') == 'True'
