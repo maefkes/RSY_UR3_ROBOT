@@ -15,7 +15,7 @@ from manager.TeachPositionManager import TeachPositionManager
 from gripper.Gripper import Gripper
 from robot.UR3eRobot import UR3eRobot
 from sensor.Controller import Controller
-
+from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
 
 class TestGui(QTabWidget):
     def __init__(self, homePosRobot3, homePosRobot4, parent=None):
@@ -33,6 +33,9 @@ class TestGui(QTabWidget):
         self.controllerTimer.timeout.connect(self.pollController)
         self.teachModeRunning = False
         self.activeRobot = None  # Aktuell steuerbarer Roboter
+        
+        # Camera
+        self.cubeColorDetetctor = CubeColorDetectorLive("best.pt")
 
         # Tabs
         self.start = QWidget()
@@ -56,47 +59,62 @@ class TestGui(QTabWidget):
         self.controller = None
         self.gripper = None
 
-    # -------------------- Start Tab --------------------
+    # -------------------- Start Tab ------------------------------------------------------------------------------------------------------------
     def startTab(self):
         layout = QVBoxLayout()
 
+        # -----------------------------------------
         # Roboter Initialisierung
+        # -----------------------------------------
         groupRobots = QGroupBox("UR3e Roboter – Initialisierung")
         layoutRobots = QGridLayout()
+
         self.btn_init_r3 = QPushButton("Roboter 3 initialisieren")
         self.btn_init_r4 = QPushButton("Roboter 4 initialisieren")
+
         self.btn_init_r3.clicked.connect(lambda: self.initializeRobot(3))
         self.btn_init_r4.clicked.connect(lambda: self.initializeRobot(4))
+
         layoutRobots.addWidget(self.btn_init_r3, 0, 0)
         layoutRobots.addWidget(self.btn_init_r4, 0, 1)
+
         self.label_robot_status = QLabel("Status: Keine Roboter initialisiert")
         layoutRobots.addWidget(self.label_robot_status, 1, 0, 1, 2)
+
         groupRobots.setLayout(layoutRobots)
         layout.addWidget(groupRobots)
 
+        # -----------------------------------------
         # Controller Initialisierung
+        # -----------------------------------------
         groupController = QGroupBox("Controller – Initialisierung")
         layoutController = QGridLayout()
+
         self.btn_init_controller = QPushButton("Controller verbinden")
         self.btn_init_controller.clicked.connect(self.initializeController)
+
         self.label_controller_status = QLabel("Status: Kein Controller verbunden")
+
         layoutController.addWidget(self.btn_init_controller, 0, 0)
         layoutController.addWidget(self.label_controller_status, 1, 0)
+
         groupController.setLayout(layoutController)
         layout.addWidget(groupController)
 
-        # TCP-Position anzeigen (Roboter 3 & 4 – Buttons nebeneinander)
+        # -----------------------------------------
+        # TCP Positionen – Roboter 3 & 4
+        # -----------------------------------------
         groupTCP = QGroupBox("TCP – Position abrufen")
         layoutTCP = QGridLayout()
 
-        # Button Roboter 3
+        # TCP R3
         self.btn_get_tcp_r3 = QPushButton("TCP Roboter 3 anzeigen")
         self.btn_get_tcp_r3.clicked.connect(
             lambda: self.label_tcp_r3.setText(f"TCP R3: {self.robot3.getActualTCPPose()}")
         )
         self.label_tcp_r3 = QLabel("TCP R3: Noch nicht abgefragt")
 
-        # Button Roboter 4
+        # TCP R4
         self.btn_get_tcp_r4 = QPushButton("TCP Roboter 4 anzeigen")
         self.btn_get_tcp_r4.clicked.connect(
             lambda: self.label_tcp_r4.setText(f"TCP R4: {self.robot4.getActualTCPPose()}")
@@ -105,18 +123,49 @@ class TestGui(QTabWidget):
 
         layoutTCP.addWidget(self.btn_get_tcp_r3, 0, 0)
         layoutTCP.addWidget(self.btn_get_tcp_r4, 0, 1)
-
         layoutTCP.addWidget(self.label_tcp_r3, 1, 0)
         layoutTCP.addWidget(self.label_tcp_r4, 1, 1)
 
         groupTCP.setLayout(layoutTCP)
         layout.addWidget(groupTCP)
 
+        # -----------------------------------------
+        # Kamera – Bildauswahl, Auswertung & Automatikmodus
+        # -----------------------------------------
+        groupCamera = QGroupBox("Kamera – Steuerung")
+        layoutCamera = QGridLayout()
+
+        # Bild auswählen
+        self.btn_select_image = QPushButton("Bild auswählen")
+        self.btn_select_image.clicked.connect(self.selectImage)
+
+        # Bild auswerten
+        self.btn_eval_image = QPushButton("Bild auswerten")
+        self.btn_eval_image.clicked.connect(self.evaluateImage)
+
+        # Automatikmodus (toggle)
+        self.btn_auto_mode = QPushButton("Automatikmodus aus")
+        self.btn_auto_mode.setCheckable(True)
+        self.btn_auto_mode.clicked.connect(self.toggleAutoMode)
+
+        # Statusanzeige
+        self.label_camera_status = QLabel("Status: Kein Bild geladen")
+
+        layoutCamera.addWidget(self.btn_select_image, 0, 0)
+        layoutCamera.addWidget(self.btn_eval_image, 0, 1)
+        layoutCamera.addWidget(self.btn_auto_mode, 1, 0, 1, 2)
+        layoutCamera.addWidget(self.label_camera_status, 2, 0, 1, 2)
+
+        groupCamera.setLayout(layoutCamera)
+        layout.addWidget(groupCamera)
+
+        # Layout anwenden
         self.start.setLayout(layout)
 
 
 
-    # -------------------- Roboter / Controller --------------------
+    # -------------------- Start Tab Hilfsmethoden------------------------------------------------------------------------------------------------------------
+
     def initializeRobot(self, robotNumber):
         ip = "192.168.0.3" if robotNumber == 3 else "192.168.0.17"
         homePos = self.homePosRobot3 if robotNumber == 3 else self.homePosRobot4
@@ -150,6 +199,28 @@ class TestGui(QTabWidget):
             print("Controller erfolgreich verbunden.")
         except Exception as e:
             QMessageBox.critical(self, "Fehler", f"Controller konnte nicht verbunden werden:\n{e}")
+            
+    def selectImage(self):
+        path, _ = QFileDialog.getOpenFileName(
+            None, "Bild auswählen", "", "Bilder (*.png *.jpg *.jpeg *.bmp)"
+        )
+        if path:
+            self.selected_image_path = path
+            self.label_camera_status.setText(f"Bild geladen: {path}")
+        else:
+            self.label_camera_status.setText("Kein Bild ausgewählt")
+
+    def evaluateImage(self):
+        self.cubeColorDetetctor.detect_from_image(self.selected_image_path)
+        
+    def toggleAutoMode(self):
+        if self.btn_auto_mode.isChecked():
+            self.btn_auto_mode.setText("Automatikmodus an")
+            self.cubeColorDetetctor.detect_from_camera()
+        else:
+            self.btn_auto_mode.setText("Automatikmodus aus")
+            # Automatik stoppen
+
 
     # -------------------- Teach Mode Tab --------------------
     def teachModeTab(self):
