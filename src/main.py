@@ -55,7 +55,7 @@ def IR_test():
     image4 = detector.detect_from_image(imgs[3])
     image5 = detector.detect_from_image(imgs[4])
     image6 = detector.detect_from_image(imgs[5])
-    print(image1.keys())
+    # print(image1.keys())
     images = [image1, image2, image3, image4, image5, image6]
 
     # 4: Rotationen speichern
