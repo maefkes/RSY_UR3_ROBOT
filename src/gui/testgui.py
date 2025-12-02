@@ -6,13 +6,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QGroupBox, QMessageBox
 )
 from PyQt6.QtCore import QSize
-import rtde_control  
-import rtde_receive
-
-from gripper.robotiq_gripper_real import RobotiqGripperReal
 from manager.SettingsManager import SettingsManager
 from manager.TeachPositionManager import TeachPositionManager
-from gripper.Gripper import Gripper
 from robot.UR3eRobot import UR3eRobot
 from sensor.Controller import Controller
 from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
@@ -57,7 +52,7 @@ class TestGui(QTabWidget):
         self.robot3 = None
         self.robot4 = None
         self.controller = None
-        self.gripper = None
+ 
 
     # -------------------- Start Tab ------------------------------------------------------------------------------------------------------------
     def startTab(self):
@@ -172,16 +167,8 @@ class TestGui(QTabWidget):
         robotName = f"robot{robotNumber}"
 
         try:
-            gripperTemplate = RobotiqGripperReal(ip)
-            robotControl = rtde_control.RTDEControlInterface(ip)
-            robotReceive = rtde_receive.RTDEReceiveInterface(ip)
-
-            # Gripper-Instanz mit SettingsManager
-            robotiqGripper = Gripper(robotName, gripperTemplate, self.settingsManager)
-            robotiqGripper.initialise()
-
             # Roboter-Instanz mit eigener Settings-Kopie
-            robot = UR3eRobot(robotControl, robotReceive, robotiqGripper, self.settingsManager, homePos, robotName)
+            robot = UR3eRobot(ip, self.settingsManager, homePos, robotName)
             robot.name = robotName
 
         except Exception as e:
@@ -319,11 +306,9 @@ class TestGui(QTabWidget):
     def setActiveRobot(self, robotNumber):
         if robotNumber == 3 and self.robot3:
             self.activeRobot = self.robot3
-            self.gripper = self.robot3.gripper
             print("Roboter 3 aktiv")
         elif robotNumber == 4 and self.robot4:
             self.activeRobot = self.robot4
-            self.gripper = self.robot4.gripper
             print("Roboter 4 aktiv")
         else:
             print(f"Roboter {robotNumber} nicht initialisiert!")
@@ -375,12 +360,12 @@ class TestGui(QTabWidget):
 
     # -------------------- Greifer --------------------
     def openGripper(self):
-        if self.activeRobot and self.gripper:
-            self.gripper.open()
+        if self.activeRobot:
+            self.activeRobot.openGripper()
 
     def closeGripper(self):
-        if self.activeRobot and self.gripper:
-            self.gripper.close()
+        if self.activeRobot:
+            self.activeRobot.closeGripper()
 
     # -------------------- Positionen --------------------
     def savePosition(self):
