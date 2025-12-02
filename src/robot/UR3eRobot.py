@@ -2,28 +2,27 @@
 import time
 import math
 
+
 class UR3eRobot:
 
-    def __init__(self, rtdeControl, rtdeReceive, robotiqGripper, settingsManager, homePosition):
+    def __init__(self, rtdeControl, rtdeReceive, robotiqGripper, settingsManager, homePosition, robotName):
 
         self.rtdeControl = rtdeControl
         self.rtdeReceive = rtdeReceive
-        self.robotiqGripper = robotiqGripper
+        self.robotiqGripper = robotiqGripper  
+        self.gripper = robotiqGripper         
         self.manager = settingsManager
+        self.robotName = robotName
         self.homePosition = homePosition
         
         # move to home position
         jointHomePosition = self.pose_to_joints(self.homePosition)
-        self.moveJ(jointHomePosition, 0.3, 0.8)
+        self.moveJ(jointHomePosition)
 
     def move_joint_axis(self, axis_index, delta_angle):
     
-        """
-        SPAETER ENTFERNEN
-        """
-        speed = 0.3
-        acc = 0.8
-        
+        speed = self.manager.get(self.robotName, "axis", "SPEED")
+        acc = self.manager.get(self.robotName, "axis", "ACCELERATION")
         
         current_joints = self.getActualQ()
         
@@ -49,11 +48,23 @@ class UR3eRobot:
     def getActualTCPPose(self):
         return  self.rtdeReceive.getActualTCPPose()
     
-    def moveL(self, position, speed, acc):
+    def moveL(self, position):
+        speed = self.manager.get(self.robotName, "axis", "SPEED")
+        acc = self.manager.get(self.robotName, "axis", "ACCELERATION")
+
         self.rtdeControl.moveL(position, speed, acc)
 
-    def moveJ(self, position, speed, acc):
+    def moveJ(self, position):
+        speed = self.manager.get(self.robotName, "axis", "SPEED")
+        acc = self.manager.get(self.robotName, "axis", "ACCELERATION")
+
         self.rtdeControl.moveJ(position, speed, acc)
+        
+    def speedL(self, velocity_vector):
+        speed = self.manager.get(self.robotName, "axis", "SPEED")
+        acc = self.manager.get(self.robotName, "axis", "ACCELERATION")
+
+        self.rtdeControl.speedL(velocity_vector, speed, acc)
 
     def getActualQ(self):
         return self.rtdeReceive.getActualQ()

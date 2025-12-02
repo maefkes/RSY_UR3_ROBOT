@@ -13,12 +13,12 @@ from enum import Enum
 # ==============================================================
 
 class AxisSettingsRobot3(Enum):
-    SPEED        = 0.5
+    SPEED        = 0.2
     ACCELERATION = 0.1
 
 
 class AxisSettingsRobot4(Enum):
-    SPEED        = 0.5
+    SPEED        = 0.2
     ACCELERATION = 0.1
 
 
