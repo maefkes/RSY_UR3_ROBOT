@@ -14,6 +14,105 @@ FUNCTION_MAP = {
         "X": ("X",0)
 }
 
+def rot_U(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
+    """Dreht die Würfel-Oberseite um den angegebenen Winkel.
+    
+    :param angle: Winkel um den die Oberseite gedreht werden soll
+    :param robot_3: Greifender Roboter
+    :param robot_4: Drehender Roboter
+    """
+    p_Gripper = []  # Position in der sich der Greifer zum Drehen befindet
+    p_preRot = []   # Vorposition des Drehers
+    p_gripRot = []  # Greifposition des Drehers
+    p_Save3 = []    # Save-Position des dritten Roboters
+    p_Save4 = []    # Save-Position des vierten Roboters
+
+    # 1: Roboter 3 (Greifer) in korrekte Position fahren (weiß nach oben)
+    robot_3.moveJ(p_Gripper)
+
+    # 2: Roboter 4 (Dreher) fährt in Vorposition (von oben)
+    robot_4.moveJ(p_preRot)
+
+    # 3: Roboter 4 (Dreher) greift 
+    robot_4.moveL(p_gripRot)
+    robot_4.gripper.close()
+    
+    # 4: Roboter 4 (Dreher) dreht
+    robot_4.move_joint_axis(5, math.radians(angle))
+    
+    # 5: Roboter 4 (Dreher) lässt lost & fährt in Vorposition
+    robot_4.gripper.open()
+    robot_4.moveJ(p_preRot)
+
+    # 6: Roboter 4 (Dreher) fährt in Save-Position
+    robot_4.moveJ(p_Save3)
+
+def rot_D(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
+    """Dreht die Würfel-Unterseite um den angegebenen Winkel.
+    
+    :param angle: Winkel um den die Rückseite gedreht werden soll
+    :param robot_3: Greifender Roboter
+    :param robot_4: Drehender Roboter
+    """
+    p_Gripper = []  # Position in der sich der Greifer zum Drehen befindet
+    p_preRot = []   # Vorposition des Drehers
+    p_gripRot = []  # Greifposition des Drehers
+    p_Save3 = []    # Save-Position des dritten Roboters
+    p_Save4 = []    # Save-Position des vierten Roboters
+
+    # 1: Roboter 3 (Greifer) in korrekte Position fahren (gelb nach oben)
+    robot_3.moveJ(p_Gripper)
+
+    # 2: Roboter 4 (Dreher) fährt in Vorposition (von oben)
+    robot_4.moveJ(p_preRot)
+
+    # 3: Roboter 4 (Dreher) greift 
+    robot_4.moveL(p_gripRot)
+    # Gripper schließen
+
+    # 4: Roboter 4 (Dreher) dreht
+    robot_4.move_joint_axis(5, math.radians(angle))
+    
+    # 5: Roboter 4 (Dreher) lässt lost & fährt in Vorposition
+    # Gripper öffnen
+    robot_4.moveL(p_preRot)
+
+    # 6: Roboter 4 (Dreher) fährt in Save-Position
+    robot_4.moveJ(p_Save4)
+   
+def rot_L(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
+    """Führt eine Rotation des Würfels nach links aus
+    
+    :param angle: Der Winkel, um den der Würfel nach links gedreht werden soll.
+    :param robot_3: der greifende Roboter
+    :param robot_4: der drehende Roboter
+    """
+    p_Gripper = []  # Position in der sich der Greifer zum Drehen befindet
+    p_preRot = []   # Vorposition des Drehers
+    p_gripRot = []  # Greifposition des Drehers
+    p_Save3 = []    # Save-Position des dritten Roboters
+    p_Save4 = []    # Save-Position des vierten Roboters
+
+    # 1: Roboter 3 (Greifer) in korrekte Position fahren (orange nach vorne)
+    robot_3.moveJ(p_Gripper)
+
+    # 2: Roboter 4 (Dreher) fährt in Vorposition (von vorne)
+    robot_4.moveJ(p_preRot)
+
+    # 3: Roboter 4 (Dreher) greift 
+    robot_4.moveL(p_gripRot)
+    # Gripper schließen
+
+    # 4: Roboter 4 (Dreher) dreht
+    robot_4.move_joint_axis(5, math.radians(angle))
+
+    # 5: Roboter 4 (Dreher) lässt lost & fährt in Vorposition
+    # Gripper öffnen
+    robot_3.moveL(p_preRot)
+
+    # 6: Roboter 4 (Dreher) fährt in Save-Position
+    robot_4.moveJ(p_Save4) 
+
 def rot_R(angle:int, robot_3:UR3eRobot, robot_4:UR3eRobot):
     """Führt eine Rotation des Würfels nach rechts aus
 
@@ -46,39 +145,6 @@ def rot_R(angle:int, robot_3:UR3eRobot, robot_4:UR3eRobot):
 
     # 6: Roboter 3 (Dreher) fährt in Save-Position
     robot_3.moveJ(p_Save3)
-
-def rot_L(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
-    """Führt eine Rotation des Würfels nach links aus
-    
-    :param angle: Der Winkel, um den der Würfel nach links gedreht werden soll.
-    :param robot_3: der greifende Roboter
-    :param robot_4: der drehende Roboter
-    """
-    p_Gripper = []  # Position in der sich der Greifer zum Drehen befindet
-    p_preRot = []   # Vorposition des Drehers
-    p_gripRot = []  # Greifposition des Drehers
-    p_Save3 = []    # Save-Position des dritten Roboters
-    p_Save4 = []    # Save-Position des vierten Roboters
-
-    # 1: Roboter 3 (Greifer) in korrekte Position fahren (orange nach vorne)
-    robot_3.moveJ(p_Gripper)
-
-    # 2: Roboter 4 (Dreher) fährt in Vorposition (von vorne)
-    robot_4.moveJ(p_preRot)
-
-    # 3: Roboter 4 (Dreher) greift 
-    robot_4.moveL(p_gripRot)
-    # Gripper schließen
-
-    # 4: Roboter 4 (Dreher) dreht
-    robot_4.move_joint_axis(5, math.radians(angle))
-
-    # 5: Roboter 4 (Dreher) lässt lost & fährt in Vorposition
-    # Gripper öffnen
-    robot_3.moveL(p_preRot)
-
-    # 6: Roboter 4 (Dreher) fährt in Save-Position
-    robot_4.moveJ(p_Save4)
 
 def rot_F(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
     """Dreht die Frontseite des Würfels um den angegebenen Winkel
@@ -141,72 +207,6 @@ def rot_B(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
     # 5: Roboter 3 (Dreher) lässt lost & fährt in Vorposition
     # Gripper öffnen
     robot_3.moveL(p_preRot)
-
-    # 6: Roboter 3 (Dreher) fährt in Save-Position
-    robot_3.moveJ(p_Save3)
-
-def rot_D(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
-    """Dreht die Würfel-Unterseite um den angegebenen Winkel.
-    
-    :param angle: Winkel um den die Rückseite gedreht werden soll
-    :param robot_3: Greifender Roboter
-    :param robot_4: Drehender Roboter
-    """
-    p_Gripper = []  # Position in der sich der Greifer zum Drehen befindet
-    p_preRot = []   # Vorposition des Drehers
-    p_gripRot = []  # Greifposition des Drehers
-    p_Save3 = []    # Save-Position des dritten Roboters
-    p_Save4 = []    # Save-Position des vierten Roboters
-
-    # 1: Roboter 3 (Greifer) in korrekte Position fahren (gelb nach oben)
-    robot_3.moveJ(p_Gripper)
-
-    # 2: Roboter 4 (Dreher) fährt in Vorposition (von oben)
-    robot_4.moveJ(p_preRot)
-
-    # 3: Roboter 4 (Dreher) greift 
-    robot_4.moveL(p_gripRot)
-    # Gripper schließen
-
-    # 4: Roboter 4 (Dreher) dreht
-    robot_4.move_joint_axis(5, math.radians(angle))
-    
-    # 5: Roboter 4 (Dreher) lässt lost & fährt in Vorposition
-    # Gripper öffnen
-    robot_4.moveL(p_preRot)
-
-    # 6: Roboter 4 (Dreher) fährt in Save-Position
-    robot_4.moveJ(p_Save4)
-
-def rot_U(angle:int, robot_3: UR3eRobot, robot_4: UR3eRobot):
-    """Dreht die Würfel-Oberseite um den angegebenen Winkel.
-    
-    :param angle: Winkel um den die Oberseite gedreht werden soll
-    :param robot_3: Drehender Roboter
-    :param robot_4: Greifender Roboter
-    """
-    p_Gripper = []  # Position in der sich der Greifer zum Drehen befindet
-    p_preRot = []   # Vorposition des Drehers
-    p_gripRot = []  # Greifposition des Drehers
-    p_Save3 = []    # Save-Position des dritten Roboters
-    p_Save4 = []    # Save-Position des vierten Roboters
-
-    # 1: Roboter 4 (Greifer) in korrekte Position fahren (weiß nach oben)
-    robot_4.moveJ(p_Gripper)
-
-    # 2: Roboter 3 (Dreher) fährt in Vorposition (von oben)
-    robot_3.moveJ(p_preRot)
-
-    # 3: Roboter 3 (Dreher) greift 
-    robot_3.moveL(p_gripRot)
-    robot_3.gripper.close()
-    
-    # 4: Roboter 3 (Dreher) dreht
-    robot_3.move_joint_axis(5, math.radians(angle))
-    
-    # 5: Roboter 3 (Dreher) lässt lost & fährt in Vorposition
-    robot_3.gripper.open()
-    robot_3.moveJ(p_preRot)
 
     # 6: Roboter 3 (Dreher) fährt in Save-Position
     robot_3.moveJ(p_Save3)
@@ -299,8 +299,9 @@ def execute_Solution(solution_str:str, robot_3:UR3eRobot, robot_4:UR3eRobot):
             _cmd = cmd
         if cmd[0] == "X":
             # hier muss noch irgendwo ein Fehler sein
-            if _cmd == "R" or _cmd == "F" or _cmd == "B" or _cmd == "U":
-                result = (4,3)
-            elif _cmd =="L" or _cmd == "D" or _cmd == "U":
-                result = (3,4)
-            handover()
+            if _cmd == "R" or _cmd == "F" or _cmd == "B":
+                direction = (4,3)
+                handover(robot_3, robot_4, direction)
+            elif  _cmd == "U" or _cmd =="L" or _cmd == "D":
+                direction = (3,4)
+                handover(robot_3, robot_4, direction)

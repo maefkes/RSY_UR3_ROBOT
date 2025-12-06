@@ -40,7 +40,7 @@ ROBOT4_IP = "192.168.0.3"
 
 def IR_test():
     # 1: Fotos laden
-    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test3\*.jpg"
+    image_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\Nahaufnahme\test7\*.jpg"
     print("Loading images")
     imgs = glob(image_path)
 
@@ -58,12 +58,20 @@ def IR_test():
     # print(image1.keys())
     images = [image1, image2, image3, image4, image5, image6]
 
-    # 4: Rotationen speichern
+    # # 4: Rotationen speichern
+    # rotation1 = {"axis": "y", "steps": 1}
+    # rotation2 = {"axis": "x", "steps": 2}
+    # rotation3 = {"axis": "y", "steps": 1}
+    # rotation4 = {"axis": "x", "steps": 1}
+    # rotation5 = {"axis": "y", "steps": 2}
+    # rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]
+
+    # # 4: Rotationen speichern
     rotation1 = {"axis": "y", "steps": 1}
-    rotation2 = {"axis": "x", "steps": 2}
+    rotation2 = {"axis": "y", "steps": 1}
     rotation3 = {"axis": "y", "steps": 1}
     rotation4 = {"axis": "x", "steps": 1}
-    rotation5 = {"axis": "y", "steps": 2}
+    rotation5 = {"axis": "x", "steps": 2}
     rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]
 
     # 5: Cube String ermitteln
