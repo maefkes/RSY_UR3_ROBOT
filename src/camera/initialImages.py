@@ -18,11 +18,19 @@ def handover(current_holder_robot:UR3eRobot, other_robot: UR3eRobot):
 
 def image1(robot: UR3eRobot, detector: CubeColorDetectorLive):
     """Roboter 4 hält. Die Seite, die initial nach unten lag, wird fotografiert.
+    "Einlesen_Down" in Excel_Tabelle
     
     :param robot: Roboter, der den Würfel hält (Roboter 4)
     :param detector: Bilderkauswertungsinstanz"""
     p_zwischen = []
-    p_foto = []
+    p_foto = [
+        math.radians(-131.6), 
+        math.radians(-130.69),
+        math.radians(-103.97),
+        math.radians(-35.45),
+        math.radians(-90.04),
+        math.radians(311.29)
+    ]
 
     robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
@@ -37,7 +45,14 @@ def image2(robot: UR3eRobot, detector: CubeColorDetectorLive):
     :param robot: Roboter, der den Würfel hält (Roboter 4)
     :param detector: Bilderkauswertungsinstanz"""
     p_zwischen = []
-    p_foto = []
+    p_foto = [
+        math.radians(-72.27), 
+        math.radians(84.09),
+        math.radians(-63.4),
+        math.radians(147.06),
+        math.radians(17.3),
+        math.radians(0.84)       
+    ]
 
     robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
@@ -63,7 +78,14 @@ def image4(robot: UR3eRobot, detector: CubeColorDetectorLive):
     :param robot: Roboter, der den Würfel hält (Roboter 3)
     :param detector: Bilderkauswertungsinstanz"""
     p_zwischen = []
-    p_foto = []
+    p_foto = [
+        math.radians(-131.96),	
+        math.radians(-140.58),	
+        math.radians(-82.25),
+        math.radians(-47.27),
+        math.radians(-89.85),
+        math.radians(311.97)
+    ]
 
     robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
@@ -78,7 +100,14 @@ def image5(robot: UR3eRobot, detector: CubeColorDetectorLive):
     :param robot: Roboter, der den Würfel hält (Roboter 3)
     :param detector: Bilderkauswertungsinstanz"""
     p_zwischen = []
-    p_foto = []
+    p_foto = [
+        math.radians(-87.5),	
+        math.radians(-103.96),	
+        math.radians(-83.6),	
+        math.radians(42.36),	
+        math.radians(-1.84),	
+        math.radians(326.27),
+    ]
 
     robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
@@ -98,6 +127,32 @@ def image6(robot: UR3eRobot, detector: CubeColorDetectorLive):
     return image
 
 
+def get_robot4_images(robot_4:UR3eRobot, detector: CubeColorDetectorLive)->list[dict]:
+    """Macht die Bilder und die Auswertung für die ersten drei Seiten (Roboter 4)
+    
+    :param robot_4: Roboter 4, der den Würfel aktuell hält
+    :param detector: Bildauswertungsinstanz
+    :returns: Eine Liste mit den Bildauswertungen, jeweils als dictionary."""
+    image_1 = image1(robot_4, detector)
+    image_2 = image1(robot_4, detector)
+    image_3 = image1(robot_4, detector)
+    images = [image_1, image_2, image_3]
+    return images
+
+
+def get_robot3_images(robot_3:UR3eRobot, detector: CubeColorDetectorLive)->tuple[list[dict]]:
+    """Macht die Bilder und die Auswertung für die ersten drei Seiten (Roboter 4)
+    
+    :param robot_3: Roboter 3, der den Würfel aktuell hält
+    :param detector: Bildauswertungsinstanz
+    :returns: Eine Liste mit den Bildauswertungen, jeweils als dictionary."""
+    image_4 = image1(robot_3, detector)
+    image_5 = image1(robot_3, detector)
+    image_6 = image1(robot_3, detector)
+    images = [image_4, image_5, image_6]
+    return images
+
+
 def get_initial_images(koords: list, robot_3: UR3eRobot, robot_4: UR3eRobot)->tuple[list[dict]]:
     """Greift den Roboter basierend auf der Kameraerkennung und fährt eine feste Reihenfolge von Positionen für die Bilder ab.
 
@@ -111,15 +166,11 @@ def get_initial_images(koords: list, robot_3: UR3eRobot, robot_4: UR3eRobot)->tu
     detector = CubeColorDetectorLive(model_path, cam_index=1)
 
     initial_grip(koords, robot_4) # todo
-    image_1 = image1(robot_4, detector) # to test
-    image_2 = image2(robot_4, detector) # to test
-    image_3 = image3(robot_4, detector) # to test
+    images = []
+    images.append(get_robot4_images(robot_4, detector)) # to test
     handover(current_holder_robot=robot_4, other_robot=robot_3) # todo
-    image_4 = image4(robot_3, detector) # to test
-    image_5 = image5(robot_3, detector) # to test
-    image_6 = image6(robot_3, detector) # to test
+    images.append(get_robot3_images(robot_3, detector)) # to test
 
-    images = [image_1, image_2, image_3, image_4, image_5, image_6]
     rotations = [] # todo
 
     return (images, rotations)
