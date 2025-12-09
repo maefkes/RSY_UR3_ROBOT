@@ -1,23 +1,30 @@
 
 import time
 import math
+import rtde_control  
+import rtde_receive
 
+from gripper.robotiq_gripper_real import RobotiqGripperReal
+from gripper.Gripper import Gripper
 
 class UR3eRobot:
 
-    def __init__(self, rtdeControl, rtdeReceive, robotiqGripper, settingsManager, homePosition, robotName):
+    def __init__(self, ip, settingsManager, homePosition, robotName):
 
-        self.rtdeControl = rtdeControl
-        self.rtdeReceive = rtdeReceive
-        self.robotiqGripper = robotiqGripper  
-        self.gripper = robotiqGripper         
         self.manager = settingsManager
-        self.robotName = robotName
         self.homePosition = homePosition
+        self.robotName = robotName
+    
+        self.rtdeControl = rtde_control.RTDEControlInterface(ip)
+        self.rtdeReceive = rtde_receive.RTDEReceiveInterface(ip)
         
+        gripperTemplate = RobotiqGripperReal(ip)
+        self.robotiqGripper = Gripper(robotName, gripperTemplate, self.manager)
+        self.robotiqGripper.initialise()
+
         # move to home position
-        jointHomePosition = self.pose_to_joints(self.homePosition)
-        self.moveJ(jointHomePosition)
+        #jointHomePosition = self.poseToJoints(self.homePosition)
+        self.moveJ(homePosition)
 
     def move_joint_axis(self, axis_index, delta_angle):
     
@@ -33,12 +40,12 @@ class UR3eRobot:
         self.moveJ(target_joints, speed, acc)
         time.sleep(0.5)
         
-    def pose_to_joints(self, tcp_pose):
+    def poseToJoints(self, tcpPose):
         """
         Wandelt eine TCP-Pose [x, y, z, rx, ry, rz] in Gelenkwinkel [q1, q2, q3, q4, q5, q6] um.
         """
         # Nutzung der eingebauten Inversen Kinematik der RTDE-Schnittstelle
-        joint_angles = self.rtdeControl.getInverseKinematics(tcp_pose)
+        joint_angles = self.rtdeControl.getInverseKinematics(tcpPose)
         
         if joint_angles is None:
             raise ValueError("Inverse Kinematik konnte für die gegebene Pose nicht berechnet werden.")
@@ -76,6 +83,12 @@ class UR3eRobot:
     def reconnect(self):
         self.rtdeControl.reconnect()
         self.rtdeReceive.reconnect()
+        
+    def openGripper(self):
+        self.robotiqGripper.open()
+
+    def closeGripper(self):
+        self.robotiqGripper.close()
         
     
      
