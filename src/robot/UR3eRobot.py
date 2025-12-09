@@ -23,7 +23,7 @@ class UR3eRobot:
         self.robotiqGripper.initialise()
 
         # move to home position
-        #jointHomePosition = self.pose_to_joints(self.homePosition)
+        #jointHomePosition = self.poseToJoints(self.homePosition)
         self.moveJ(homePosition)
 
     def move_joint_axis(self, axis_index, delta_angle):
@@ -40,12 +40,12 @@ class UR3eRobot:
         self.moveJ(target_joints, speed, acc)
         time.sleep(0.5)
         
-    def pose_to_joints(self, tcp_pose):
+    def poseToJoints(self, tcpPose):
         """
         Wandelt eine TCP-Pose [x, y, z, rx, ry, rz] in Gelenkwinkel [q1, q2, q3, q4, q5, q6] um.
         """
         # Nutzung der eingebauten Inversen Kinematik der RTDE-Schnittstelle
-        joint_angles = self.rtdeControl.getInverseKinematics(tcp_pose)
+        joint_angles = self.rtdeControl.getInverseKinematics(tcpPose)
         
         if joint_angles is None:
             raise ValueError("Inverse Kinematik konnte für die gegebene Pose nicht berechnet werden.")
