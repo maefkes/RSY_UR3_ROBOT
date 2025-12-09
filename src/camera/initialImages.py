@@ -1,5 +1,5 @@
 from robot.UR3eRobot import UR3eRobot
-from DetectAndSortCube_fixed import CubeColorDetectorLive
+from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
 import math
 
 def initial_grip(koords:list, gripper_robot: UR3eRobot):
@@ -32,11 +32,11 @@ def image1(robot: UR3eRobot, detector: CubeColorDetectorLive):
         math.radians(311.29)
     ]
 
-    robot.moveJ(p_zwischen)
+    # robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
 
-    image = detector.detect_from_camera()
-    return image
+    # image = detector.detect_from_camera()
+    # return image
 
 
 def image2(robot: UR3eRobot, detector: CubeColorDetectorLive):
@@ -57,8 +57,8 @@ def image2(robot: UR3eRobot, detector: CubeColorDetectorLive):
     robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
 
-    image = detector.detect_from_camera()
-    return image
+    # image = detector.detect_from_camera()
+    # return image
 
 
 def image3(robot: UR3eRobot, detector: CubeColorDetectorLive):
@@ -68,8 +68,8 @@ def image3(robot: UR3eRobot, detector: CubeColorDetectorLive):
     :param detector: Bilderkauswertungsinstanz"""
     robot.move_joint_axis(5,180)
 
-    image = detector.detect_from_camera()
-    return image
+    # image = detector.detect_from_camera()
+    # return image
 
 
 def image4(robot: UR3eRobot, detector: CubeColorDetectorLive):
@@ -134,8 +134,11 @@ def get_robot4_images(robot_4:UR3eRobot, detector: CubeColorDetectorLive)->list[
     :param detector: Bildauswertungsinstanz
     :returns: Eine Liste mit den Bildauswertungen, jeweils als dictionary."""
     image_1 = image1(robot_4, detector)
-    image_2 = image1(robot_4, detector)
-    image_3 = image1(robot_4, detector)
+    input("Position 1 fertig. Drücke eine Taste um fortzufahren...")
+    image_2 = image2(robot_4, detector)
+    input("Position 2 fertig. Drücke eine Taste um fortzufahren...")
+    image_3 = image3(robot_4, detector)
+    input("Position 3 fertig. Drücke eine Taste um fortzufahren...")
     images = [image_1, image_2, image_3]
     return images
 
@@ -146,9 +149,9 @@ def get_robot3_images(robot_3:UR3eRobot, detector: CubeColorDetectorLive)->tuple
     :param robot_3: Roboter 3, der den Würfel aktuell hält
     :param detector: Bildauswertungsinstanz
     :returns: Eine Liste mit den Bildauswertungen, jeweils als dictionary."""
-    image_4 = image1(robot_3, detector)
-    image_5 = image1(robot_3, detector)
-    image_6 = image1(robot_3, detector)
+    image_4 = image4(robot_3, detector)
+    image_5 = image5(robot_3, detector)
+    image_6 = image6(robot_3, detector)
     images = [image_4, image_5, image_6]
     return images
 
