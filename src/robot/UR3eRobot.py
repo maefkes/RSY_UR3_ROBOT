@@ -1,4 +1,3 @@
-
 import time
 import math
 import rtde_control  
@@ -37,7 +36,7 @@ class UR3eRobot:
         target_joints[axis_index] += delta_angle
 
         print(f"Fahre Achse {axis_index+1} um {math.degrees(delta_angle):.1f}°...")
-        self.moveJ(target_joints, speed, acc)
+        self.moveJ(target_joints)
         time.sleep(0.5)
         
     def poseToJoints(self, tcpPose):
