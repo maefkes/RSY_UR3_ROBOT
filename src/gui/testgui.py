@@ -1,4 +1,5 @@
-import time, json
+import time
+import json
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtWidgets import (
     QWidget, QPushButton, QGridLayout, QLabel,
@@ -12,10 +13,12 @@ from robot.UR3eRobot import UR3eRobot
 from sensor.Controller import Controller
 from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
 
+
 class TestGui(QTabWidget):
     def __init__(self, homePosRobot3, homePosRobot4, parent=None):
         super().__init__(parent)
 
+        # Home-Pos für Roboter
         self.homePosRobot3 = homePosRobot3
         self.homePosRobot4 = homePosRobot4
 
@@ -23,14 +26,15 @@ class TestGui(QTabWidget):
         self.settingsManager = SettingsManager()
         self.teachPositionManager = TeachPositionManager(self.homePosRobot3, self.homePosRobot4)
 
-        # Controller Timer
+        # Timer für Controller-Polling
         self.controllerTimer = QtCore.QTimer()
         self.controllerTimer.timeout.connect(self.pollController)
         self.teachModeRunning = False
-        self.activeRobot = None  # Aktuell steuerbarer Roboter
-        
-        # Camera
+        self.activeRobot = None  # aktuell steuerbarer Roboter
+
+        # Kamera / Detector
         self.cubeColorDetetctor = CubeColorDetectorLive("best.pt")
+        self.selected_image_path = None
 
         # Tabs
         self.start = QWidget()
@@ -41,18 +45,18 @@ class TestGui(QTabWidget):
         self.addTab(self.teachMode, "Teach-Modus")
         self.addTab(self.settingsMode, "Einstellungen")
 
+        # initialisiere GUI-Contents
         self.startTab()
         self.teachModeTab()
         self.settingsTab()
 
         self.setWindowTitle('UR3e - Magic Cube')
-        self.setMinimumSize(QSize(300, 650))
+        self.setMinimumSize(QSize(320, 720))
 
-        # Roboter & Controller
+        # Roboter & Controller (erst nach Init vorhanden)
         self.robot3 = None
         self.robot4 = None
         self.controller = None
- 
 
     # -------------------- Start Tab ------------------------------------------------------------------------------------------------------------
     def startTab(self):
@@ -104,16 +108,12 @@ class TestGui(QTabWidget):
 
         # TCP R3
         self.btn_get_tcp_r3 = QPushButton("TCP Roboter 3 anzeigen")
-        self.btn_get_tcp_r3.clicked.connect(
-            lambda: self.label_tcp_r3.setText(f"TCP R3: {self.robot3.getActualTCPPose()}")
-        )
+        self.btn_get_tcp_r3.clicked.connect(self.show_tcp_r3)
         self.label_tcp_r3 = QLabel("TCP R3: Noch nicht abgefragt")
 
         # TCP R4
         self.btn_get_tcp_r4 = QPushButton("TCP Roboter 4 anzeigen")
-        self.btn_get_tcp_r4.clicked.connect(
-            lambda: self.label_tcp_r4.setText(f"TCP R4: {self.robot4.getActualTCPPose()}")
-        )
+        self.btn_get_tcp_r4.clicked.connect(self.show_tcp_r4)
         self.label_tcp_r4 = QLabel("TCP R4: Noch nicht abgefragt")
 
         layoutTCP.addWidget(self.btn_get_tcp_r3, 0, 0)
@@ -157,9 +157,23 @@ class TestGui(QTabWidget):
         # Layout anwenden
         self.start.setLayout(layout)
 
+    def show_tcp_r3(self):
+        if self.robot3:
+            try:
+                self.label_tcp_r3.setText(f"TCP R3: {self.robot3.getActualTCPPose()}")
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Lesen TCP R3:\n{e}")
+        else:
+            self.label_tcp_r3.setText("TCP R3: Roboter 3 nicht initialisiert")
 
-
-    # -------------------- Start Tab Hilfsmethoden------------------------------------------------------------------------------------------------------------
+    def show_tcp_r4(self):
+        if self.robot4:
+            try:
+                self.label_tcp_r4.setText(f"TCP R4: {self.robot4.getActualTCPPose()}")
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Fehler beim Lesen TCP R4:\n{e}")
+        else:
+            self.label_tcp_r4.setText("TCP R4: Roboter 4 nicht initialisiert")
 
     def initializeRobot(self, robotNumber):
         ip = "192.168.0.3" if robotNumber == 3 else "192.168.0.17"
@@ -167,10 +181,8 @@ class TestGui(QTabWidget):
         robotName = f"robot{robotNumber}"
 
         try:
-            # Roboter-Instanz mit eigener Settings-Kopie
             robot = UR3eRobot(ip, self.settingsManager, homePos, robotName)
             robot.name = robotName
-
         except Exception as e:
             QMessageBox.critical(self, "Fehler", f"Roboter {robotNumber} konnte nicht initialisiert werden:\n{e}")
             return
@@ -183,7 +195,6 @@ class TestGui(QTabWidget):
         self.label_robot_status.setText(f"Status: Roboter {robotNumber} erfolgreich initialisiert")
         print(f"Roboter {robotNumber} initialisiert.")
 
-
     def initializeController(self):
         try:
             self.controller = Controller()
@@ -191,7 +202,7 @@ class TestGui(QTabWidget):
             print("Controller erfolgreich verbunden.")
         except Exception as e:
             QMessageBox.critical(self, "Fehler", f"Controller konnte nicht verbunden werden:\n{e}")
-            
+
     def selectImage(self):
         path, _ = QFileDialog.getOpenFileName(
             None, "Bild auswählen", "", "Bilder (*.png *.jpg *.jpeg *.bmp)"
@@ -203,16 +214,30 @@ class TestGui(QTabWidget):
             self.label_camera_status.setText("Kein Bild ausgewählt")
 
     def evaluateImage(self):
-        self.cubeColorDetetctor.detect_from_image(self.selected_image_path)
-        
+        if not self.selected_image_path:
+            QMessageBox.warning(self, "Warnung", "Kein Bild ausgewählt.")
+            return
+        try:
+            self.cubeColorDetetctor.detect_from_image(self.selected_image_path)
+        except Exception as e:
+            QMessageBox.critical(self, "Fehler", f"Fehler bei Bildauswertung:\n{e}")
+
     def toggleAutoMode(self):
         if self.btn_auto_mode.isChecked():
             self.btn_auto_mode.setText("Automatikmodus an")
-            self.cubeColorDetetctor.detect_from_camera()
+            try:
+                self.cubeColorDetetctor.detect_from_camera()
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Automatik-Kamera konnte nicht gestartet werden:\n{e}")
+                self.btn_auto_mode.setChecked(False)
+                self.btn_auto_mode.setText("Automatikmodus aus")
         else:
             self.btn_auto_mode.setText("Automatikmodus aus")
-            # Automatik stoppen
-
+            # Falls detect_from_camera einen Thread/Loop startet, das Stoppen dort implementieren.
+            # Wir versuchen, falls vorhanden, eine stop-Funktion aufzurufen.
+            stop_fn = getattr(self.cubeColorDetetctor, "stop_camera_loop", None)
+            if callable(stop_fn):
+                stop_fn()
 
     # -------------------- Teach Mode Tab --------------------
     def teachModeTab(self):
@@ -241,7 +266,7 @@ class TestGui(QTabWidget):
         self.btn_teachOff.clicked.connect(self.teachOffSlot)
         layoutTeach.addWidget(self.btn_teachOff)
 
-        # Achsensteuerung
+        # Achsensteuerung (Free/Close)
         self.btn_axisFree = QPushButton("Achsen lösen")
         self.btn_axisFree.clicked.connect(self.axisFree)
         layoutTeach.addWidget(self.btn_axisFree)
@@ -311,95 +336,232 @@ class TestGui(QTabWidget):
             self.activeRobot = self.robot4
             print("Roboter 4 aktiv")
         else:
-            print(f"Roboter {robotNumber} nicht initialisiert!")
+            QMessageBox.warning(self, "Warnung", f"Roboter {robotNumber} nicht initialisiert!")
 
     # -------------------- Teach Mode Funktionen --------------------
     def teachOnSlot(self):
         if not self.activeRobot or not self.controller:
-            print("Kein Roboter oder Controller aktiv!")
+            QMessageBox.warning(self, "Warnung", "Kein Roboter oder Controller aktiv!")
             return
         self.teachModeRunning = True
-        self.controllerTimer.start(10)
+        # Polling-Intervall: 20 ms (50 Hz) — anpassbar
+        self.controllerTimer.start(20)
         self.btn_teachOn.setEnabled(False)
         self.btn_teachOff.setEnabled(True)
 
     def teachOffSlot(self):
         self.teachModeRunning = False
         self.controllerTimer.stop()
-        if self.activeRobot:
-            self.activeRobot.disconnect()
-            self.activeRobot.reconnect()
+        # Versuche Verbindung kurz neu aufzubauen (sicherstellen, dass Roboter nicht im Teach bleibt)
+        try:
+            if self.activeRobot:
+                self.activeRobot.disconnect()
+                time.sleep(0.1)
+                self.activeRobot.reconnect()
+        except Exception:
+            pass
         self.btn_teachOn.setEnabled(True)
         self.btn_teachOff.setEnabled(False)
 
     def axisFree(self):
         if self.activeRobot:
-            self.teachPositionManager.enableTeachMode()
-            self.btn_axisFree.setEnabled(False)
-            self.btn_axisClose.setEnabled(True)
+            try:
+                self.teachPositionManager.enableTeachMode()
+                self.btn_axisFree.setEnabled(False)
+                self.btn_axisClose.setEnabled(True)
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Achsen konnten nicht gelöst werden:\n{e}")
 
     def axisClose(self):
         if self.activeRobot:
-            self.teachPositionManager.disableTeachMode()
-            self.btn_axisFree.setEnabled(True)
-            self.btn_axisClose.setEnabled(False)
-            print(self.activeRobot.getActualTCPPose())
+            try:
+                self.teachPositionManager.disableTeachMode()
+                self.btn_axisFree.setEnabled(True)
+                self.btn_axisClose.setEnabled(False)
+                print(self.activeRobot.getActualTCPPose())
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Achsen konnten nicht geschlossen werden:\n{e}")
 
+    # -------------------- Controller Polling (JOINT BASED) --------------------
     def pollController(self):
-        if not self.activeRobot or not self.teachModeRunning:
+        """
+        Liest Achsen & Buttons vom Controller und berechnet inkrementelle Joint-Winkel.
+        R1 -> Greifer öffnen, R2 -> Greifer schließen.
+        """
+
+        if not self.activeRobot or not self.teachModeRunning or not self.controller:
             return
-        axes = self.controller.get_axes()
-        dx = axes.get("x", 0.0) * 0.1
-        dy = axes.get("y", 0.0) * 0.1
-        dz = axes.get("ry", 0.0) * 0.1
-        d_rx = 0.0
-        d_ry = 0.0
-        d_rz = axes.get("rx", 0.0) * 0.1
-        velocity = [dx, dy, dz, d_rx, d_ry, d_rz]
-        self.activeRobot.speedL(velocity)
+
+        try:
+            axes = self.controller.get_axes() or {}
+        except Exception as e:
+            print(f"Controller Achsen-Lese-Fehler: {e}")
+            return
+
+        try:
+            buttons = self.controller.get_buttons() or {}
+        except Exception:
+            buttons = {}
+
+        # helper: Deadzone
+        def deadzone(val, dz=0.12):
+            return 0.0 if abs(val) < dz else val
+
+        # unterstützte Achskeys: "x","y","z","rx","ry","rz" oder joystick-layout "lx,ly,rx,ry"
+        ax_x = deadzone(axes.get("x", axes.get("lx", 0.0)))
+        ax_y = deadzone(axes.get("y", axes.get("ly", 0.0)))
+        ax_z = deadzone(axes.get("ry", axes.get("z", 0.0)))   # benutze 'ry' bevorzugt
+        ax_rz = deadzone(axes.get("rx", axes.get("rz", 0.0)))
+
+        # Schrittweiten in Radiant pro Poll
+        step_base = 0.01     # Basis/Schulter/Elbow grobe Skalierung
+        step_wrist = 0.02    # kleinere Schritte für Handgelenk
+
+        # Lese aktuelle Gelenkwinkel (getActualQ) erwartet Liste [q1..q6] in rad
+        try:
+            joints = list(self.activeRobot.getActualQ())  # kopieren
+            if len(joints) < 6:
+                # Guard: falls andere Form zurückkommt
+                raise ValueError("getActualQ liefert keine 6 Gelenkwerte")
+        except Exception as e:
+            print(f"Fehler beim Lesen der Gelenkwinkel: {e}")
+            return
+
+        # Mapping Controller -> Joint-Inkremente (anpassbar)
+        # Hier: Stick X -> J1 (Base), Stick Y -> J2 (Shoulder), Stick Z/ry -> J3 (Elbow),
+        # RX -> J4 (Wrist1). J5/J6 unverändert.
+        joints[0] += ax_x * step_base
+        joints[1] += ax_y * step_base
+        joints[2] += ax_z * step_base
+        joints[3] += ax_rz * step_wrist
+
+        # Grenzen (sichere Clamping - typisch ±pi)
+        for i in range(6):
+            if joints[i] is None:
+                joints[i] = 0.0
+            if joints[i] > 3.14159:
+                joints[i] = 3.14159
+            if joints[i] < -3.14159:
+                joints[i] = -3.14159
+
+        # Führe Bewegung aus (moveJ)
+        try:
+            self.activeRobot.moveJ(joints)
+        except Exception as e:
+            print(f"Fehler bei moveJ: {e}")
+
+        # ---------------- Greifer via Buttons ----------------
+        # Flexible Erkennung: Buttons kann dict mit Namen oder Indices sein.
+        def btn_pressed(name_or_idx):
+            # name_or_idx kann "R1" oder 5 etc. buttons kann beides enthalten
+            if isinstance(buttons, dict):
+                # direkte Keys
+                if name_or_idx in buttons:
+                    return bool(buttons.get(name_or_idx))
+                # alternative Keys
+                alt_map = {
+                    "R1": ["R1", "rb", "RB", "button5", 5],
+                    "R2": ["R2", "rt", "RT", "button6", 6]
+                }
+                for k in alt_map.get(name_or_idx, []):
+                    if k in buttons:
+                        return bool(buttons.get(k))
+                # numeric-like keys
+                try:
+                    if isinstance(name_or_idx, int):
+                        return bool(buttons.get(name_or_idx, False))
+                except Exception:
+                    pass
+                return False
+            else:
+                # falls buttons z.B. Liste ist
+                try:
+                    if isinstance(name_or_idx, int):
+                        return bool(buttons[name_or_idx])
+                except Exception:
+                    return False
+
+        if btn_pressed("R1"):
+            try:
+                self.activeRobot.openGripper()
+            except Exception as e:
+                print(f"Fehler Greifer öffnen: {e}")
+
+        if btn_pressed("R2"):
+            try:
+                self.activeRobot.closeGripper()
+            except Exception as e:
+                print(f"Fehler Greifer schließen: {e}")
 
     # -------------------- Greifer --------------------
     def openGripper(self):
         if self.activeRobot:
-            self.activeRobot.openGripper()
+            try:
+                self.activeRobot.openGripper()
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Greifer konnte nicht geöffnet werden:\n{e}")
+        else:
+            QMessageBox.warning(self, "Warnung", "Kein aktiver Roboter.")
 
     def closeGripper(self):
         if self.activeRobot:
-            self.activeRobot.closeGripper()
+            try:
+                self.activeRobot.closeGripper()
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Greifer konnte nicht geschlossen werden:\n{e}")
+        else:
+            QMessageBox.warning(self, "Warnung", "Kein aktiver Roboter.")
 
     # -------------------- Positionen --------------------
     def savePosition(self):
         if not self.activeRobot:
-            print("Kein Roboter aktiv!")
+            QMessageBox.warning(self, "Warnung", "Kein Roboter aktiv!")
             return
         name = self.lineEdit_Save.text().strip()
         if not name:
-            print("Positionsname fehlt.")
+            QMessageBox.warning(self, "Warnung", "Positionsname fehlt.")
             return
-        pose = self.activeRobot.getActualTCPPose()
-        self.teachPositionManager.addPosition(f"R{self.activeRobot.name[-1]}_{name}", pose)
-        print(f"Position '{name}' gespeichert für {self.activeRobot.name}")
+        try:
+            pose = self.activeRobot.getActualTCPPose()
+            key = f"R{self.activeRobot.name[-1]}_{name}"
+            self.teachPositionManager.addPosition(key, pose)
+            print(f"Position '{name}' gespeichert für {self.activeRobot.name}")
+            self.updatePositionList()
+        except Exception as e:
+            QMessageBox.critical(self, "Fehler", f"Position konnte nicht gespeichert werden:\n{e}")
 
     def gotoInitial(self):
         if not self.activeRobot:
+            QMessageBox.warning(self, "Warnung", "Kein Roboter aktiv!")
             return
-        home = self.homePosRobot3 if self.activeRobot.name.endswith("3") else self.homePosRobot4
-        self.activeRobot.moveL(home)
-        print(self.activeRobot.getActualTCPPose())
+        try:
+            home = self.homePosRobot3 if self.activeRobot.name.endswith("3") else self.homePosRobot4
+            self.activeRobot.moveL(home)
+            print(self.activeRobot.getActualTCPPose())
+        except Exception as e:
+            QMessageBox.critical(self, "Fehler", f"Initialposition konnte nicht angefahren werden:\n{e}")
 
     def goToPositionSlot(self):
         if not self.activeRobot:
+            QMessageBox.warning(self, "Warnung", "Kein Roboter aktiv!")
             return
         name = self.lineEdit_GoTo.text().strip()
-        pose = self.teachPositionManager.getSavedPosition(f"R{self.activeRobot.name[-1]}_{name}")
+        key = f"R{self.activeRobot.name[-1]}_{name}"
+        pose = self.teachPositionManager.getSavedPosition(key)
         if pose:
-            self.activeRobot.moveL(pose)
+            try:
+                self.activeRobot.moveL(pose)
+            except Exception as e:
+                QMessageBox.critical(self, "Fehler", f"Position konnte nicht angefahren werden:\n{e}")
         else:
-            print("Position nicht gefunden.")
+            QMessageBox.warning(self, "Warnung", "Position nicht gefunden.")
 
     def updatePositionList(self):
         self.listWidget_Positions.clear()
-        self.listWidget_Positions.addItems(self.teachPositionManager.listPositions())
+        try:
+            self.listWidget_Positions.addItems(self.teachPositionManager.listPositions())
+        except Exception as e:
+            QMessageBox.critical(self, "Fehler", f"Positionen konnten nicht geladen werden:\n{e}")
 
     def exportPositions(self):
         try:
@@ -541,32 +703,56 @@ class TestGui(QTabWidget):
         # Layout anwenden
         self.settingsMode.setLayout(mainLayout)
 
-
-       
-
-    # -------------------- Hilfsmethoden --------------------
+    # -------------------- Hilfsmethoden für Settings (roboterabhängig) --------------------
     def updateSettingsWidgets(self, robotName):
-        """Lädt die aktuellen Werte des gewählten Roboters in die Widgets"""
-        self.spin_axis_speed.blockSignals(True)
-        self.spin_axis_acc.blockSignals(True)
-        self.slider_force.blockSignals(True)
-        self.slider_speed.blockSignals(True)
-        self.slider_position.blockSignals(True)
+        """
+        Lädt die aktuellen Werte des gewählten Roboters in die Widgets.
+        robotName erwartet 'robot3' oder 'robot4'.
+        """
+        if robotName == "robot3":
+            self.spin_r3_axis_speed.blockSignals(True)
+            self.spin_r3_axis_acc.blockSignals(True)
+            self.slider_r3_force.blockSignals(True)
+            self.slider_r3_speed.blockSignals(True)
+            self.slider_r3_position.blockSignals(True)
 
-        self.spin_axis_speed.setValue(self.settingsManager.get(robotName, 'axis', 'SPEED'))
-        self.spin_axis_acc.setValue(self.settingsManager.get(robotName, 'axis', 'ACCELERATION'))
-        self.slider_force.setValue(self.settingsManager.get(robotName, 'gripper', 'FORCE'))
-        self.slider_speed.setValue(self.settingsManager.get(robotName, 'gripper', 'SPEED'))
-        self.slider_position.setValue(self.settingsManager.get(robotName, 'gripper', 'POSITION'))
+            self.spin_r3_axis_speed.setValue(self.settingsManager.get("robot3", 'axis', 'SPEED'))
+            self.spin_r3_axis_acc.setValue(self.settingsManager.get("robot3", 'axis', 'ACCELERATION'))
+            self.slider_r3_force.setValue(self.settingsManager.get("robot3", 'gripper', 'FORCE'))
+            self.slider_r3_speed.setValue(self.settingsManager.get("robot3", 'gripper', 'SPEED'))
+            self.slider_r3_position.setValue(self.settingsManager.get("robot3", 'gripper', 'POSITION'))
 
-        self.spin_axis_speed.blockSignals(False)
-        self.spin_axis_acc.blockSignals(False)
-        self.slider_force.blockSignals(False)
-        self.slider_speed.blockSignals(False)
-        self.slider_position.blockSignals(False)
+            self.spin_r3_axis_speed.blockSignals(False)
+            self.spin_r3_axis_acc.blockSignals(False)
+            self.slider_r3_force.blockSignals(False)
+            self.slider_r3_speed.blockSignals(False)
+            self.slider_r3_position.blockSignals(False)
 
-    def updateSetting(self, group, name, value):
-        """Speichert einen Wert in SettingsManager für den aktuell gewählten Roboter"""
-        robotName = self.combo_robot.currentText()
-        self.settingsManager.set(robotName, group, name, value)
+        elif robotName == "robot4":
+            self.spin_r4_axis_speed.blockSignals(True)
+            self.spin_r4_axis_acc.blockSignals(True)
+            self.slider_r4_force.blockSignals(True)
+            self.slider_r4_speed.blockSignals(True)
+            self.slider_r4_position.blockSignals(True)
 
+            self.spin_r4_axis_speed.setValue(self.settingsManager.get("robot4", 'axis', 'SPEED'))
+            self.spin_r4_axis_acc.setValue(self.settingsManager.get("robot4", 'axis', 'ACCELERATION'))
+            self.slider_r4_force.setValue(self.settingsManager.get("robot4", 'gripper', 'FORCE'))
+            self.slider_r4_speed.setValue(self.settingsManager.get("robot4", 'gripper', 'SPEED'))
+            self.slider_r4_position.setValue(self.settingsManager.get("robot4", 'gripper', 'POSITION'))
+
+            self.spin_r4_axis_speed.blockSignals(False)
+            self.spin_r4_axis_acc.blockSignals(False)
+            self.slider_r4_force.blockSignals(False)
+            self.slider_r4_speed.blockSignals(False)
+            self.slider_r4_position.blockSignals(False)
+
+    def updateSetting(self, robotName, group, name, value):
+        """
+        Speichert einen Wert in SettingsManager für den angegebenen Roboter.
+        robotName: 'robot3' oder 'robot4'
+        """
+        try:
+            self.settingsManager.set(robotName, group, name, value)
+        except Exception as e:
+            QMessageBox.critical(self, "Fehler", f"Setting konnte nicht gespeichert werden:\n{e}")
