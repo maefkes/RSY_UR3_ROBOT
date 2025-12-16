@@ -1,10 +1,12 @@
 from robot.UR3eRobot import UR3eRobot
 from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
 import math
+import time
 
 def initial_grip(pre_koords: list, koords:list, gripper_robot: UR3eRobot):
     """Initiales Aufnehmen des Würfels basierend auf der Kameraerkennung
     
+    :param pre_koords: Vorposition zum Greifen des Würfels
     :param koords: Koordinaten des Würfels in radiant
     :param gripper_robot: Roboter, der greifen soll"""
     p_initialGrip_pre = pre_koords
@@ -12,6 +14,9 @@ def initial_grip(pre_koords: list, koords:list, gripper_robot: UR3eRobot):
 
     gripper_robot.openGripper()
     gripper_robot.moveJ(p_initialGrip_pre)
+    print("TCP Pose: ", gripper_robot.getActualTCPPose())
+    input("passt?")
+
     gripper_robot.moveL(p_initialGrip)
     gripper_robot.closeGripper()
 
@@ -21,7 +26,7 @@ def handover(current_holder_robot:UR3eRobot, other_robot: UR3eRobot):
     :param current_holder_robot: Roboter, der den Würfel aktuell hält
     :param other_robot: Roboter, der den Würfel übernehmen soll"""
     robot4 = current_holder_robot
-    robot3 = other_robot
+    # robot3 = other_robot
 
     p_handover_rob4_pre = []
     p_handover_rob4 = [
@@ -45,12 +50,14 @@ def handover(current_holder_robot:UR3eRobot, other_robot: UR3eRobot):
     robot4.moveJ(p_handover_rob4_pre)
     robot4.moveL(p_handover_rob4)
 
-    robot3.openGripper()
-    robot3.moveJ(p_handover_rob3_pre)
-    robot3.moveL(p_handover_rob3)
+    # robot3.openGripper()
+    # robot3.moveJ(p_handover_rob3_pre)
+    # robot3.moveL(p_handover_rob3)
 
-    robot3.closeGripper()
+    # robot3.closeGripper()
     robot4.openGripper()
+    time.sleep(3)
+    robot4.moveL(p_handover_rob4_pre)
 
 def image1(robot: UR3eRobot, detector: CubeColorDetectorLive):
     """Roboter 4 hält. Die Seite, die initial nach unten lag, wird fotografiert.
@@ -79,7 +86,14 @@ def image2(robot: UR3eRobot, detector: CubeColorDetectorLive):
     
     :param robot: Roboter, der den Würfel hält (Roboter 4)
     :param detector: Bilderkauswertungsinstanz"""
-    p_zwischen = []
+    p_zwischen = [
+        math.radians(-122.17),
+        math.radians(-102.82),
+        math.radians(-97.79),
+        math.radians(-38.3),
+        math.radians(0.78),
+        math.radians(311.25)
+    ]
     p_foto = [
         math.radians(-72.27), 
         math.radians(-84.09),
@@ -89,7 +103,7 @@ def image2(robot: UR3eRobot, detector: CubeColorDetectorLive):
         math.radians(0.84)       
     ]
 
-    # robot.moveJ(p_zwischen)
+    robot.moveJ(p_zwischen)
     robot.moveJ(p_foto)
 
     image = detector.detect_from_camera()
@@ -100,10 +114,10 @@ def image3(robot: UR3eRobot, detector: CubeColorDetectorLive):
     
     :param robot: Roboter, der den Würfel hält (Roboter 4)
     :param detector: Bilderkauswertungsinstanz"""
-    robot.move_joint_axis(5,180)
+    robot.move_joint_axis(5,math.radians(180))
 
-    # image = detector.detect_from_camera()
-    # return image
+    image = detector.detect_from_camera()
+    return image
 
 def image4(robot: UR3eRobot, detector: CubeColorDetectorLive):
     """Roboter 3 hält. Die Seite, die initial nach oben gezeigt hat, wird fotografiert.

@@ -94,6 +94,6 @@ class Gripper:
         print("Connecting to gripper...")
         self.connect()
         print("Activating gripper...")
-        # self.activate()
+        self.activate()
         self.moveAndWaitForPosition(255, 255, 255)
         self.moveAndWaitForPosition(0, 255, 255)
