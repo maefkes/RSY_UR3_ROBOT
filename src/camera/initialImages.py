@@ -3,22 +3,25 @@ from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
 import math
 import time
 
-def initial_grip(pre_koords: list, koords:list, gripper_robot: UR3eRobot):
+def initial_grip(pre_koords:list, koords:list, gripper_robot: UR3eRobot):
     """Initiales Aufnehmen des Würfels basierend auf der Kameraerkennung
     
+    :param pre_koords_tcp: Vorposition zum Greifen des Würfels in TCP Koordinaten
     :param pre_koords: Vorposition zum Greifen des Würfels
     :param koords: Koordinaten des Würfels in radiant
     :param gripper_robot: Roboter, der greifen soll"""
     p_initialGrip_pre = pre_koords
-    p_initialGrip = koords
+    p_initialGrip_tcp = koords
 
     gripper_robot.openGripper()
     gripper_robot.moveJ(p_initialGrip_pre)
-    print("TCP Pose: ", gripper_robot.getActualTCPPose())
-    input("passt?")
+    print("Aktuelle TCP-Position: ", gripper_robot.getActualTCPPose())
 
-    gripper_robot.moveL(p_initialGrip)
+    gripper_robot.moveL(p_initialGrip_tcp)
     gripper_robot.closeGripper()
+    input("Drücke eine beliebige Taste um fortzufahren...")
+    gripper_robot.moveJ(p_initialGrip_pre) # eigentlich besser 
+
 
 def handover(current_holder_robot:UR3eRobot, other_robot: UR3eRobot):
     """Übergabe des Würfels zwischen den Robotern
