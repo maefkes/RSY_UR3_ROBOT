@@ -126,6 +126,7 @@ class CubeColorDetectorLive:
         return result
 
     def detect_from_camera(self) -> Optional[Dict[str, str]]:
+        """Versucht eine Farberkennung vom Kamerabild aus zu ermitteln."""
         cap = cv2.VideoCapture(self.cam_index)
         if not cap.isOpened():
             print("❌ Keine Kamera gefunden.")
