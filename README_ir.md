@@ -9,11 +9,12 @@ Der Würfel muss so erkannt werden, dass der Roboter ihn greifen und lösen kann
 - Farbgitter des Würfels erkennen
 - Matrix für Lösungsalgorithmus erstellen
 ## ToDo
-- [x] Würfellokalisierung
-- [x] Würfelorientierung zum Greifen
-- [x] Farberkennung
-- [ ] Würfelorientierung für die Farben
-- [ ] In Matrix umwandeln
+- [x] Koordinaten einpflegen
+    - [x] Foto-Koordinaten
+    - [x] Übergabe-Koordinaten
+- [ ] Foto + Auswertung triggern
+
+
 ## Anwendung
 Lade die Bildpfade
 ```bash

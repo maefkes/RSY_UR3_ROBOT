@@ -1,5 +1,3 @@
-import rtde_control
-import rtde_receive
 import time
 import math
 from robot.UR3eRobot import UR3eRobot
