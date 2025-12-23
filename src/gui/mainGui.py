@@ -12,16 +12,17 @@ from manager.SettingsManager import SettingsManager
 from manager.TeachPositionManager import TeachPositionManager
 from robot.UR3eRobot import UR3eRobot
 from camera.DetectAndSortCube_fixed import CubeColorDetectorLive
+from rubiks_cube_execution import *
 
 
 # ==================== Farb-Mapping ====================
 CUBE_COLOR_MAP = {
-    "0": "#FFFFFF",
-    "1": "#FF0000",
-    "2": "#0000FF",
-    "3": "#FFA500",
-    "4": "#00FF00",
-    "5": "#FFFF00",
+    "w": "#FFFFFF",
+    "r": "#FF0000",
+    "b": "#0000FF",
+    "o": "#FFA500",
+    "g": "#00FF00",
+    "y": "#FFFF00",
 }
 
 
@@ -79,6 +80,7 @@ class MainGui(QTabWidget):
         self.robot4 = None
         #self.initializeRobot(3)
         #self.initializeRobot(4)
+        rubiksCubeExe_init(self.robot3, self.robot4)
 
         self.cubeColorDetetctor = CubeColorDetectorLive("best.pt")
 
@@ -120,16 +122,17 @@ class MainGui(QTabWidget):
         groupCube = QGroupBox("Rubik's Cube")
         cubeLayout = QVBoxLayout()
 
-        test_string = (
-            "000000000"  # +z
-            "111111111"  # -y
-            "222222222"  # +x
-            "333333333"  # +y
-            "444444444"  # -x
-            "555555555"  # -z
-        )
-
-        faces = self.decodeColorString(test_string)
+        #test_string = (
+         
+         #"wwwwwwwww"  # +z
+         #"rrrrrrrrr"  # -y
+         #"ggggggggg"  # +x
+         #"bbbbbbbbb"  # +y
+         #"ooooooooo"  # -x
+         #"yyyyyyyyy"  # -z
+         #)
+        string = rubiksCubeExe_getColorString()
+        faces = self.decodeColorString(string)
 
         self.cubeWidget = CubeWidget(faces)
         cubeLayout.addWidget(self.cubeWidget)
