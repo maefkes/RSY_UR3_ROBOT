@@ -9,14 +9,18 @@ import time
 def initial_grip(pre_koords:list, koords:list, gripper_robot: UR3eRobot):
     """Initiales Aufnehmen des Würfels basierend auf der Kameraerkennung
     
-    :param pre_koords_tcp: Vorposition zum Greifen des Würfels in TCP Koordinaten
     :param pre_koords: Vorposition zum Greifen des Würfels
-    :param koords: Koordinaten des Würfels in radiant
+    :param koords: Koordinaten des Würfels in radiant, als tcp koordinaten
     :param gripper_robot: Roboter, der greifen soll"""
+
+    print("Starte mit initial Grip")
     p_initialGrip_pre = pre_koords
     p_initialGrip_tcp = koords
 
-    gripper_robot.openGripper()
+    try:
+        gripper_robot.openGripper()
+    except Exception as e:
+        print("Problem mit Gripper: ", e)
     gripper_robot.moveJ(p_initialGrip_pre)
     print("Aktuelle TCP-Position: ", gripper_robot.getActualTCPPose())
 
@@ -37,7 +41,10 @@ def handover(current_holder_robot:UR3eRobot, positions:positions, other_robot: U
 
     p_handover_rob3_pre = positions.pose_umgreifen_rob3_pre.getJoint()
     p_handover_rob3 = positions.pose_umgreifen_rob3.getJoint()
+    p_handover_rob4 = positions.pose_umgreifen_rob4.getJoint()
     p_handover_rob4_pre = positions.pose_umgreifen_rob4_pre.getJoint()
+
+    robot4.moveJ(p_handover_rob4)
 
     robot3.openGripper()
     input("Greifer 3 geöffnet? Drücke eine beliebige Taste um fortzufahren... ")
@@ -200,7 +207,7 @@ def get_initial_images(positions: positions, robot_3: UR3eRobot, robot_4: UR3eRo
     """
     
     # Detektor initialisieren
-    model_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\models\20251223.pt"
+    model_path = r"C:\Users\heyni\Desktop\Studium\Master\Module\2025_26_WS\RSY\Project\RSY_UR3_ROBOT\data\models\20251223_01.pt"
     detector = CubeColorDetectorLive(model_path, cam_index=1)
     images = []
 
@@ -215,6 +222,11 @@ def get_initial_images(positions: positions, robot_3: UR3eRobot, robot_4: UR3eRo
     images.append(get_robot3_images(robot_3, positions, detector))
 
     # Rotationen sind fix
-    rotations = [] # todo
+    rotation1 = {"axis":"y", "steps": 1}
+    rotation2 = {"axis": "x", "steps": 2}
+    rotation3 = {"axis": "x", "steps": -1}
+    rotation4 = {"axis": "x", "steps": 2}
+    rotation5 = {"axis": "y", "steps": 1}
+    rotations = [rotation1, rotation2, rotation3, rotation4, rotation5]
 
     return (images, rotations)

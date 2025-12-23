@@ -1,7 +1,7 @@
 from robot.pose import pose
 from robot.UR3eRobot import UR3eRobot
 import math
-from copy import copy
+from copy import copy, deepcopy
 
 # initiales Greifen
 p_initialGrip_pre = [
@@ -98,6 +98,12 @@ p_umgreifen_rob3 =      [
 ]
 
 # Drehoperationen
+p_rotU_rob4 = copy()
+p_rotU_rob3 = copy()
+p_rotR_rob4 = copy()
+p_rotR_rob3 = copy()
+p_rotL_rob4 = copy()
+p_rotL_rob3 = copy()
 
 
 class positions:
@@ -133,16 +139,64 @@ class positions:
 
         # Umgreifoperationen
         self.pose_umgreifen_rob4 = pose(robot_4.rtdeControl)
-        self.pose_umgreifen_rob4.setJoint(p_umgreifen_rob4)
-        self.pose_umgreifen_rob4.setRotEuler([90,0,-90])
+        self.pose_umgreifen_rob4.setJoint(copy(p_umgreifen_rob4))
+        self.pose_umgreifen_rob4.setRotEuler([-90,0,90])
         self.pose_umgreifen_rob3_pre = pose(robot_3.rtdeControl)
-        self.pose_umgreifen_rob3_pre.setJoint(p_umgreifen_rob3_pre)
+        self.pose_umgreifen_rob3_pre.setJoint(copy(p_umgreifen_rob3_pre))
         self.pose_umgreifen_rob3_pre.setRotEuler([0,-90,0])
         self.pose_umgreifen_rob3 = pose(robot_3.rtdeControl)
-        self.pose_umgreifen_rob3.setJoint(p_umgreifen_rob3)
+        self.pose_umgreifen_rob3.setJoint(copy(p_umgreifen_rob3))
         self.pose_umgreifen_rob3.setRotEuler([0,-90,0])
 
         # Vorposition für rob4 aus Position ermitteln
-        self.pose_umgreifen_rob4_pre = copy(self.pose_umgreifen_rob4)
-        self.pose_umgreifen_rob4_pre.transInMeters[0] = self.pose_umgreifen_rob4_pre.transInMeters[0] + 35/1000
-        self.pose_umgreifen_rob4_pre.setRotEuler([90,0,-90])
+        self.pose_umgreifen_rob4_pre = pose(robot_4.rtdeControl)
+        self.pose_umgreifen_rob4_pre.setJoint(copy(p_umgreifen_rob4))
+        self.pose_umgreifen_rob4_pre.transInMeters[0] = self.pose_umgreifen_rob4_pre.transInMeters[0] + 50/1000
+        self.pose_umgreifen_rob4_pre.setRotEuler([-90,0,90])
+
+        # Positionen für die Operationen
+
+        # rot U
+        self.pose_rotU_rob3 = pose(robot_3.rtdeControl)
+        self.pose_rotU_rob3.setJoint(copy(p_umgreifen_rob3))
+        self.pose_rotU_rob3.setRotEuler([0,-90,0])
+
+        self.pose_rotU_rob4 = pose(robot_4.rtdeControl)
+        self.pose_rotU_rob4.setJoint(copy(p_umgreifen_rob4))
+        self.pose_rotU_rob4.setRotEuler([90,0,-90])
+        self.pose_rotU_rob4.transInMeters[0] = self.pose_rotU_rob4.transInMeters[0] + 16/1000
+
+        self.pose_rotU_rob4_pre = pose(robot_4.rtdeControl)
+        self.pose_rotU_rob4_pre.setJoint(copy(p_umgreifen_rob4))
+        self.pose_rotU_rob4_pre.transInMeters[0] = self.pose_rotU_rob4.transInMeters[0] + 35/1000
+        self.pose_rotU_rob4_pre.setRotEuler([90,0,-90])
+
+        # rot L
+        self.pose_rotL_rob3 = pose(robot_3.rtdeControl)
+        self.pose_rotL_rob3.setJoint(copy(p_umgreifen_rob3))
+        self.pose_rotL_rob3.setRotEuler([0,0,90])
+
+        self.pose_rotL_rob4 = pose(robot_4.rtdeControl)
+        self.pose_rotL_rob4.setJoint(copy(p_umgreifen_rob4))
+        self.pose_rotL_rob4.setRotEuler([90,0,-90])
+        self.pose_rotL_rob4.transInMeters[0] = self.pose_rotL_rob4.transInMeters[0] + 16/1000
+
+        self.pose_rotL_rob4_pre = pose(robot_4.rtdeControl)
+        self.pose_rotL_rob4_pre.setJoint(copy(p_umgreifen_rob4))
+        self.pose_rotL_rob4_pre.transInMeters[0] = self.pose_rotL_rob4.transInMeters[0] + 35/1000
+        self.pose_rotL_rob4_pre.setRotEuler([90,0,-90])
+
+        # rot R
+        self.pose_rotR_rob3 = pose(robot_3.rtdeControl)
+        self.pose_rotR_rob3.setJoint(copy(p_umgreifen_rob3))
+        self.pose_rotR_rob3.setRotEuler([0,0,-90])
+
+        self.pose_rotR_rob4 = pose(robot_4.rtdeControl)
+        self.pose_rotR_rob4.setJoint(copy(p_umgreifen_rob4))
+        self.pose_rotR_rob4.setRotEuler([90,0,-90])
+        self.pose_rotR_rob4.transInMeters[0] = self.pose_rotR_rob4.transInMeters[0] + 16/1000
+
+        self.pose_rotR_rob4_pre = pose(robot_4.rtdeControl)
+        self.pose_rotR_rob4_pre.setJoint(copy(p_umgreifen_rob4))
+        self.pose_rotR_rob4_pre.transInMeters[0] = self.pose_rotR_rob4.transInMeters[0] + 35/1000
+        self.pose_rotR_rob4_pre.setRotEuler([90,0,-90])
